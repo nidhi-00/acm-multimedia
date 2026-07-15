@@ -1,0 +1,131 @@
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local Docs
+/docs
+AGENTS.md
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging/build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# -----------------------------
+# Secrets / local configuration
+# -----------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# -----------------------------
+# IDE / editor
+# -----------------------------
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+
+# -----------------------------
+# OS
+# -----------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# -----------------------------
+# Jupyter
+# -----------------------------
+.ipynb_checkpoints/
+
+# -----------------------------
+# Logs / temp files
+# -----------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# -----------------------------
+# Local application/cache state
+# -----------------------------
+.cache/
+cache/
+.gradio/
+local_state/
+*.sqlite
+*.sqlite3
+*.db
+
+# -----------------------------
+# Datasets / generated ML artifacts
+# Keep tiny fixtures/examples in tests/fixtures or demo_assets/examples.
+# -----------------------------
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+outputs/*
+!outputs/.gitkeep
+
+artifacts/
+models/
+checkpoints/
+embeddings/
+
+*.faiss
+*.index
+*.ann
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+
+# -----------------------------
+# Demo cached outputs and generated submission media
+# Source example assets may be committed intentionally under demo_assets/examples.
+# -----------------------------
+demo_assets/cache/
+demo_assets/generated/
+submission/generated/
+submission/renders/
+
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# -----------------------------
+# Misc local tool state
+# -----------------------------
+.codex/
