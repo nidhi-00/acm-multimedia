@@ -1,0 +1,45 @@
+{
+  "schema_version": "0.1",
+  "request_id": "fixture-no-evidence",
+  "input": {
+    "post_text": "Yeh local bridge aaj subah public ke liye open hua hai kya?",
+    "image_present": true
+  },
+  "analysis": {
+    "ocr_text": "RIVER VIEW BRIDGE · OPENING SOON",
+    "languages": [
+      {
+        "label": "Hindi-Roman",
+        "text": "Yeh local bridge aaj subah public ke liye open hua hai kya?"
+      },
+      {
+        "label": "English",
+        "text": "local bridge"
+      }
+    ],
+    "normalized_text": "Kya local bridge aaj subah public ke liye khola gaya?",
+    "retrieval_text": "The local River View Bridge opened to the public this morning.",
+    "claims": [
+      {
+        "claim": "River View Bridge opened to the public this morning.",
+        "entities": ["River View Bridge"],
+        "temporal_reference": "this morning",
+        "checkworthy": true
+      }
+    ],
+    "visual_description": "A distant road bridge photographed from a riverbank; no opening ceremony is visible."
+  },
+  "evidence": [],
+  "verdict": "INSUFFICIENT_EVIDENCE",
+  "confidence": null,
+  "explanation": "No sufficiently relevant evidence was returned, so the claim cannot be supported or contradicted.",
+  "warnings": [
+    "The mock retrieval set contains no evidence for this local claim."
+  ],
+  "latency": {
+    "total_ms": 430,
+    "retrieval_ms": 80,
+    "verification_ms": 120
+  }
+}
+

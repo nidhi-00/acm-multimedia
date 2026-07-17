@@ -1,0 +1,95 @@
+{
+  "schema_version": "0.1",
+  "request_id": "fixture-contradicted",
+  "input": {
+    "post_text": "Mumbai mein aaj ka scene hai — airport ke paas sab roads flooded hain.",
+    "image_present": true
+  },
+  "analysis": {
+    "ocr_text": "BREAKING · MUMBAI AIRPORT ROADS CLOSED TODAY",
+    "languages": [
+      {
+        "label": "Hindi-Roman",
+        "text": "Mumbai mein aaj ka scene hai",
+        "start": 0,
+        "end": 29
+      },
+      {
+        "label": "English",
+        "text": "airport roads flooded",
+        "start": 32,
+        "end": 53
+      }
+    ],
+    "normalized_text": "Mumbai mein aaj airport ke paas sab roads flooded hain.",
+    "retrieval_text": "The post claims that roads near Mumbai airport are flooded today.",
+    "claims": [
+      {
+        "claim": "Roads near Mumbai airport are flooded today.",
+        "entities": ["Mumbai Airport"],
+        "temporal_reference": "today",
+        "checkworthy": true
+      },
+      {
+        "claim": "The uploaded photograph was taken in Mumbai today.",
+        "entities": ["Mumbai"],
+        "temporal_reference": "today",
+        "checkworthy": true
+      }
+    ],
+    "visual_description": "Vehicles travel through deep water on a flooded urban road beside concrete buildings."
+  },
+  "evidence": [
+    {
+      "evidence_id": "ev-contradicted-001",
+      "rank": 1,
+      "title": "Flood photograph predates the current Mumbai claim",
+      "source_name": "Example Fact Check",
+      "source_url": "https://example.invalid/flood-photo",
+      "snippet": "The same photograph appeared in reporting about flooding in another city two years earlier.",
+      "image_path": "demo_assets/examples/earlier-flood.png",
+      "text_score": 0.88,
+      "image_score": 0.94,
+      "combined_score": 0.92,
+      "evidence_verdict": "CONTRADICTS"
+    },
+    {
+      "evidence_id": "ev-contradicted-002",
+      "rank": 2,
+      "title": "Airport traffic advisory reports normal road access",
+      "source_name": "Mumbai Traffic Police",
+      "source_url": "https://example.invalid/traffic-advisory",
+      "snippet": "The current advisory reports no closure of the airport approach roads.",
+      "image_path": null,
+      "text_score": 0.86,
+      "image_score": null,
+      "combined_score": 0.84,
+      "evidence_verdict": "CONTRADICTS"
+    },
+    {
+      "evidence_id": "ev-contradicted-003",
+      "rank": 3,
+      "title": "Monsoon conditions remain under observation",
+      "source_name": "Regional Weather Desk",
+      "source_url": null,
+      "snippet": "Rain is forecast, but this report does not place the uploaded image in Mumbai.",
+      "image_path": null,
+      "text_score": 0.61,
+      "image_score": null,
+      "combined_score": 0.58,
+      "evidence_verdict": "RELATED"
+    }
+  ],
+  "verdict": "CONTRADICTED",
+  "confidence": 0.91,
+  "explanation": "The image matches an older event in another location, while the current traffic advisory conflicts with the claimed road closure.",
+  "warnings": [
+    "Mock result: no live OCR, retrieval, or verification was performed."
+  ],
+  "latency": {
+    "total_ms": 910,
+    "retrieval_ms": 140,
+    "verification_ms": 260
+  }
+}
+

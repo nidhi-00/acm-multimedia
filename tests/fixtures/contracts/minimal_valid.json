@@ -1,0 +1,15 @@
+{
+  "schema_version": "0.1",
+  "request_id": "fixture-minimal",
+  "input": {
+    "post_text": null,
+    "image_present": true
+  },
+  "analysis": {},
+  "evidence": [],
+  "verdict": "INSUFFICIENT_EVIDENCE",
+  "confidence": null,
+  "explanation": "The response is valid but contains no analysis or evidence details.",
+  "warnings": []
+}
+

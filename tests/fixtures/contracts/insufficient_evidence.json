@@ -1,0 +1,59 @@
+{
+  "schema_version": "0.1",
+  "request_id": "fixture-insufficient",
+  "input": {
+    "post_text": "Kal se is nayi policy ke wajah se sab private schools band rahenge.",
+    "image_present": false
+  },
+  "analysis": {
+    "ocr_text": null,
+    "languages": [
+      {
+        "label": "Hindi-Roman",
+        "text": "Kal se is nayi policy ke wajah se sab private schools band rahenge"
+      },
+      {
+        "label": "English",
+        "text": "private schools"
+      }
+    ],
+    "normalized_text": "Kal se nayi policy ke karan sab private schools band rahenge.",
+    "retrieval_text": "All private schools will close tomorrow because of a new policy.",
+    "claims": [
+      {
+        "claim": "All private schools will close tomorrow because of a new policy.",
+        "entities": ["private schools"],
+        "temporal_reference": "tomorrow",
+        "checkworthy": true
+      }
+    ],
+    "visual_description": null
+  },
+  "evidence": [
+    {
+      "evidence_id": "ev-insufficient-001",
+      "rank": 1,
+      "title": "General education circular",
+      "source_name": "Education Department Archive",
+      "source_url": null,
+      "snippet": "A recent circular discusses school administration but does not announce a closure.",
+      "image_path": null,
+      "text_score": 0.43,
+      "image_score": null,
+      "combined_score": null,
+      "evidence_verdict": "RELATED"
+    }
+  ],
+  "verdict": "INSUFFICIENT_EVIDENCE",
+  "confidence": null,
+  "explanation": "The retrieved item is only generally related and does not establish whether the claimed closure will occur.",
+  "warnings": [
+    "No authoritative announcement was found in the mock evidence set."
+  ],
+  "latency": {
+    "total_ms": 670,
+    "retrieval_ms": 105,
+    "verification_ms": 190
+  }
+}
+

@@ -1,0 +1,74 @@
+{
+  "schema_version": "0.1",
+  "request_id": "fixture-supported",
+  "input": {
+    "post_text": "Delhi Metro ki Yellow Line par aaj normal service chal rahi hai.",
+    "image_present": true
+  },
+  "analysis": {
+    "ocr_text": "DELHI METRO SERVICE UPDATE · YELLOW LINE NORMAL",
+    "languages": [
+      {
+        "label": "Hindi-Roman",
+        "text": "Delhi Metro ki Yellow Line par aaj",
+        "start": 0,
+        "end": 36
+      },
+      {
+        "label": "English",
+        "text": "normal service",
+        "start": 37,
+        "end": 51
+      }
+    ],
+    "normalized_text": "Delhi Metro ki Yellow Line par aaj normal service chal rahi hai.",
+    "retrieval_text": "Delhi Metro Yellow Line is operating normally today.",
+    "claims": [
+      {
+        "claim": "Delhi Metro's Yellow Line is operating normally today.",
+        "entities": ["Delhi Metro", "Yellow Line"],
+        "temporal_reference": "today",
+        "checkworthy": true
+      }
+    ],
+    "visual_description": "A red and white public-transport service update card with the Delhi Metro wordmark."
+  },
+  "evidence": [
+    {
+      "evidence_id": "ev-supported-001",
+      "rank": 1,
+      "title": "Normal services reported on Yellow Line",
+      "source_name": "Delhi Metro Rail Corporation",
+      "source_url": "https://example.invalid/dmrc-yellow-line",
+      "snippet": "The official service update states that trains are operating normally on the Yellow Line.",
+      "image_path": "demo_assets/examples/metro-update.png",
+      "text_score": 0.95,
+      "image_score": 0.89,
+      "combined_score": 0.93,
+      "evidence_verdict": "SUPPORTS"
+    },
+    {
+      "evidence_id": "ev-supported-002",
+      "rank": 2,
+      "title": "Commuter bulletin lists no Yellow Line disruption",
+      "source_name": "City Transit Desk",
+      "source_url": null,
+      "snippet": "The daily transit bulletin lists delays elsewhere but no Yellow Line closure.",
+      "image_path": null,
+      "text_score": 0.83,
+      "image_score": null,
+      "combined_score": 0.81,
+      "evidence_verdict": "SUPPORTS"
+    }
+  ],
+  "verdict": "SUPPORTED",
+  "confidence": 0.96,
+  "explanation": "The caption and service card agree with two contemporaneous service updates, including the official operator notice.",
+  "warnings": [],
+  "latency": {
+    "total_ms": 820,
+    "retrieval_ms": 120,
+    "verification_ms": 240
+  }
+}
+
