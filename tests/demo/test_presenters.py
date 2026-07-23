@@ -3,7 +3,13 @@ from pathlib import Path
 import pytest
 
 from demo.contracts import FinalVerdict, VerificationResult
-from demo.presenters import render_evidence, render_verdict
+from demo.presenters import (
+    render_caveats,
+    render_evidence,
+    render_original_caption,
+    render_understanding,
+    render_verdict,
+)
 
 FIXTURE_DIRECTORY = Path(__file__).parents[1] / "fixtures" / "contracts"
 
@@ -43,8 +49,8 @@ def test_empty_evidence_renders_as_valid_state() -> None:
 
     rendered = render_evidence(result.evidence)
 
-    assert "No evidence items returned" in rendered
-    assert "absence of evidence is not a contradiction" in rendered
+    assert "No relevant evidence was returned" in rendered
+    assert "This is an abstention, not a contradiction" in rendered
 
 
 def test_five_evidence_rows_render_without_truncation() -> None:
@@ -59,4 +65,47 @@ def test_five_evidence_rows_render_without_truncation() -> None:
 
     rendered = render_evidence(evidence)
 
-    assert rendered.count('<article class="evidence-row">') == 5
+    assert rendered.count('<article class="evidence-row vh-evidence-row">') == 5
+
+
+def test_minimal_analysis_uses_intentional_empty_states_without_fake_values() -> None:
+    result = VerificationResult.model_validate_json(
+        (FIXTURE_DIRECTORY / "minimal_valid.json").read_text(encoding="utf-8")
+    )
+
+    rendered = render_understanding(result)
+
+    assert "No OCR text was included" in rendered
+    assert "No factual claim was returned" in rendered
+    assert "Normalized text" not in rendered
+    assert "Retrieval form" not in rendered
+    assert "Visual description" not in rendered
+
+
+def test_caveats_are_hidden_when_no_warning_is_supplied() -> None:
+    result = VerificationResult.model_validate_json(
+        (FIXTURE_DIRECTORY / "supported.json").read_text(encoding="utf-8")
+    )
+
+    assert render_caveats(result) == ""
+
+
+@pytest.mark.parametrize(
+    "fixture_name", ["contradicted", "insufficient_evidence", "no_evidence"]
+)
+def test_caveats_replace_internal_mock_language(fixture_name: str) -> None:
+    result = VerificationResult.model_validate_json(
+        (FIXTURE_DIRECTORY / f"{fixture_name}.json").read_text(encoding="utf-8")
+    )
+
+    rendered = render_caveats(result)
+
+    assert "mock" not in rendered.lower()
+    assert "fixture" not in rendered.lower()
+
+
+def test_original_caption_is_html_escaped() -> None:
+    rendered = render_original_caption('<script>alert("x")</script>')
+
+    assert "<script>" not in rendered
+    assert "&lt;script&gt;" in rendered
