@@ -1,0 +1,39 @@
+﻿{
+  "audit_version": "IMAGE_MAPPING_INTEGRITY_V2_FINAL",
+  "suspicious_records": 4,
+  "findings": {
+    "hmx-0643": {
+      "img_id": 3196,
+      "packaging_correct": true,
+      "underlying_metadata_image_inconsistency": true,
+      "present_in_v7": false
+    },
+    "hmx-0536": {
+      "img_id": 2868,
+      "packaging_correct": true,
+      "underlying_metadata_image_inconsistency": true,
+      "present_in_v7": false
+    },
+    "hmx-0647": {
+      "img_id": 3200,
+      "packaging_correct": true,
+      "underlying_metadata_image_inconsistency": true,
+      "present_in_v7": false
+    },
+    "hmx-0475": {
+      "img_id": 2534,
+      "packaging_correct": true,
+      "underlying_metadata_image_inconsistency": true,
+      "present_in_v7": false
+    }
+  },
+  "suspected_swap_check": {
+    "hmx-0643_equals_hmx-0647_source": false,
+    "hmx-0647_equals_hmx-0643_source": false
+  },
+  "impact": {
+    "ocr_benchmark": "All four records excluded from the final OCR evaluation.",
+    "v7_benchmark": "No impact. None of the four records occurs in V7."
+  },
+  "conclusion": "OCR packaging is correct. The inconsistencies originate in the underlying dataset associations."
+}
