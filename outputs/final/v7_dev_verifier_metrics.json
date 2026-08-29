@@ -1,0 +1,149 @@
+{
+  "protocol": {
+    "selection_set": "V7 DEV only",
+    "v7_test_untouched": true,
+    "retrieval_strategy_frozen": {
+      "family": "linear",
+      "alpha_raw": 0.55,
+      "alpha_generated": 0.45,
+      "dev_R@1": 0.7333333333333333
+    },
+    "verifier_candidates": [
+      "top1_joint",
+      "top3_independent",
+      "cascade_top1_then_next2"
+    ],
+    "verifier_selection_metric": "macro-F1; tie-break strict accuracy, covered accuracy, then lower latency"
+  },
+  "strategies": {
+    "top1_joint": {
+      "n": 60,
+      "strict_accuracy": 0.4666666666666667,
+      "macro_f1": 0.5428571428571429,
+      "coverage": 0.5,
+      "covered_accuracy": 0.9333333333333333,
+      "prediction_counts": {
+        "SUPPORTED": 24,
+        "CONTRADICTED": 6,
+        "INSUFFICIENT_EVIDENCE": 30
+      },
+      "supported_recall": 0.5217391304347826,
+      "contradicted_recall": 0.2857142857142857,
+      "median_latency_ms": 3556.35,
+      "confusion_matrix": [
+        [
+          24,
+          2,
+          20
+        ],
+        [
+          0,
+          4,
+          10
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "top3_independent": {
+      "n": 60,
+      "strict_accuracy": 0.5333333333333333,
+      "macro_f1": 0.5971357409713574,
+      "coverage": 0.5833333333333334,
+      "covered_accuracy": 0.9142857142857143,
+      "prediction_counts": {
+        "SUPPORTED": 27,
+        "CONTRADICTED": 8,
+        "INSUFFICIENT_EVIDENCE": 25
+      },
+      "supported_recall": 0.5869565217391305,
+      "contradicted_recall": 0.35714285714285715,
+      "median_latency_ms": 10033.400000000001,
+      "confusion_matrix": [
+        [
+          27,
+          3,
+          16
+        ],
+        [
+          0,
+          5,
+          9
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "cascade_top1_then_next2": {
+      "n": 60,
+      "strict_accuracy": 0.5333333333333333,
+      "macro_f1": 0.5971357409713574,
+      "coverage": 0.5833333333333334,
+      "covered_accuracy": 0.9142857142857143,
+      "prediction_counts": {
+        "SUPPORTED": 27,
+        "CONTRADICTED": 8,
+        "INSUFFICIENT_EVIDENCE": 25
+      },
+      "supported_recall": 0.5869565217391305,
+      "contradicted_recall": 0.35714285714285715,
+      "median_latency_ms": 6528.8,
+      "confusion_matrix": [
+        [
+          27,
+          3,
+          16
+        ],
+        [
+          0,
+          5,
+          9
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "selected_strategy": "cascade_top1_then_next2",
+  "oracle_evidence_diagnostic": {
+    "n": 60,
+    "strict_accuracy": 0.5166666666666667,
+    "macro_f1": 0.6248399487836107,
+    "coverage": 0.55,
+    "covered_accuracy": 0.9393939393939394,
+    "prediction_counts": {
+      "SUPPORTED": 25,
+      "CONTRADICTED": 8,
+      "INSUFFICIENT_EVIDENCE": 27
+    },
+    "supported_recall": 0.5434782608695652,
+    "contradicted_recall": 0.42857142857142855,
+    "median_latency_ms": 3580.5,
+    "confusion_matrix": [
+      [
+        25,
+        2,
+        19
+      ],
+      [
+        0,
+        6,
+        8
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ]
+  }
+}

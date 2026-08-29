@@ -129,3 +129,18 @@ submission/renders/
 # Misc local tool state
 # -----------------------------
 .codex/
+
+# VerifyHinglish generated/local artifacts
+.vscode/
+verifyhinglish/
+*.zip
+*.npy
+*.index
+*.log
+.venv/
+**/.venv/
+__pycache__/
+.pytest_cache/
+data/raw/
+models/
+.cache/

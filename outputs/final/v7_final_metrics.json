@@ -1,0 +1,193 @@
+{
+  "benchmark_version": "V7_FINAL_FROZEN",
+  "protocol": {
+    "test_queries": 60,
+    "test_labels": {
+      "SUPPORTED": 46,
+      "CONTRADICTED": 14
+    },
+    "test_source": "All V7 TEST examples were sampled from the untouched V6 TRAIN pool before V7 DEV tuning.",
+    "test_used_for_tuning": false,
+    "retrieval_strategy": {
+      "family": "linear",
+      "alpha_raw": 0.55,
+      "alpha_generated": 0.45,
+      "selected_on": "V7 DEV only"
+    },
+    "verifier_strategy": {
+      "name": "cascade_top1_then_next2",
+      "selected_on": "V7 DEV only"
+    }
+  },
+  "normalization": {
+    "structured_parse_success_rate": 0.8833333333333333,
+    "median_latency_ms": 6865.1
+  },
+  "text_retrieval": {
+    "raw": {
+      "R@1": 0.5833333333333334,
+      "R@5": 0.7,
+      "R@10": 0.7333333333333333
+    },
+    "generated": {
+      "R@1": 0.6333333333333333,
+      "R@5": 0.7,
+      "R@10": 0.7333333333333333
+    },
+    "fused_55_45": {
+      "R@1": 0.6666666666666666,
+      "R@5": 0.7666666666666667,
+      "R@10": 0.7666666666666667
+    }
+  },
+  "text_retrieval_ci95": {
+    "raw": {
+      "R@1": {
+        "estimate": 0.5833333333333334,
+        "ci95_low": 0.45,
+        "ci95_high": 0.7
+      },
+      "R@5": {
+        "estimate": 0.7,
+        "ci95_low": 0.5833333333333334,
+        "ci95_high": 0.8166666666666667
+      },
+      "R@10": {
+        "estimate": 0.7333333333333333,
+        "ci95_low": 0.6166666666666667,
+        "ci95_high": 0.8333333333333334
+      }
+    },
+    "generated": {
+      "R@1": {
+        "estimate": 0.6333333333333333,
+        "ci95_low": 0.5166666666666667,
+        "ci95_high": 0.75
+      },
+      "R@5": {
+        "estimate": 0.7,
+        "ci95_low": 0.5833333333333334,
+        "ci95_high": 0.8166666666666667
+      },
+      "R@10": {
+        "estimate": 0.7333333333333333,
+        "ci95_low": 0.6166666666666667,
+        "ci95_high": 0.85
+      }
+    },
+    "fused_55_45": {
+      "R@1": {
+        "estimate": 0.6666666666666666,
+        "ci95_low": 0.55,
+        "ci95_high": 0.7833333333333333
+      },
+      "R@5": {
+        "estimate": 0.7666666666666667,
+        "ci95_low": 0.65,
+        "ci95_high": 0.8666666666666667
+      },
+      "R@10": {
+        "estimate": 0.7666666666666667,
+        "ci95_low": 0.65,
+        "ci95_high": 0.8666666666666667
+      }
+    }
+  },
+  "text_retrieval_by_label": {
+    "SUPPORTED": {
+      "raw": {
+        "R@1": 0.6739130434782609,
+        "R@5": 0.782608695652174,
+        "R@10": 0.8260869565217391
+      },
+      "generated": {
+        "R@1": 0.7608695652173914,
+        "R@5": 0.8478260869565217,
+        "R@10": 0.8695652173913043
+      },
+      "fused_55_45": {
+        "R@1": 0.8043478260869565,
+        "R@5": 0.8913043478260869,
+        "R@10": 0.8913043478260869
+      }
+    },
+    "CONTRADICTED": {
+      "raw": {
+        "R@1": 0.2857142857142857,
+        "R@5": 0.42857142857142855,
+        "R@10": 0.42857142857142855
+      },
+      "generated": {
+        "R@1": 0.21428571428571427,
+        "R@5": 0.21428571428571427,
+        "R@10": 0.2857142857142857
+      },
+      "fused_55_45": {
+        "R@1": 0.21428571428571427,
+        "R@5": 0.35714285714285715,
+        "R@10": 0.35714285714285715
+      }
+    }
+  },
+  "verifier": {
+    "n": 60,
+    "strategy": "cascade_top1_then_next2",
+    "strategy_selected_on": "V7 DEV only",
+    "strict_accuracy": 0.38333333333333336,
+    "strict_accuracy_ci95": {
+      "estimate": 0.38333333333333336,
+      "ci95_low": 0.26666666666666666,
+      "ci95_high": 0.5166666666666667
+    },
+    "macro_f1": 0.42803030303030304,
+    "coverage": 0.5,
+    "covered_accuracy": 0.7666666666666667,
+    "prediction_counts": {
+      "SUPPORTED": 20,
+      "CONTRADICTED": 10,
+      "INSUFFICIENT_EVIDENCE": 30
+    },
+    "supported_recall": 0.43478260869565216,
+    "contradicted_recall": 0.21428571428571427,
+    "per_class": {
+      "SUPPORTED": {
+        "precision": 1.0,
+        "recall": 0.43478260869565216,
+        "f1": 0.6060606060606061,
+        "support": 46
+      },
+      "CONTRADICTED": {
+        "precision": 0.3,
+        "recall": 0.21428571428571427,
+        "f1": 0.25,
+        "support": 14
+      }
+    },
+    "confusion_matrix_labels": [
+      "SUPPORTED",
+      "CONTRADICTED",
+      "INSUFFICIENT_EVIDENCE"
+    ],
+    "confusion_matrix": [
+      [
+        20,
+        7,
+        19
+      ],
+      [
+        0,
+        3,
+        11
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "top1_retrieval_accuracy": 0.6666666666666666,
+    "median_latency_ms": 8351.3,
+    "mean_documents_evaluated": 2.2,
+    "parse_success_rate": 1.0
+  }
+}

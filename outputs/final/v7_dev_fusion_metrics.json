@@ -1,0 +1,90 @@
+{
+  "protocol": {
+    "selection_set": "V7 DEV only",
+    "v7_dev_queries": 60,
+    "v7_test_queries_reserved_untouched": 60,
+    "selection_metric": "R@1, then R@5, then R@10; exact ties prefer simpler strategy",
+    "reason_for_new_dev": "V6 exposed a distribution shift where generated queries underperformed raw Hinglish. V5 DEV is therefore not reused for this new fusion-selection step."
+  },
+  "normalization": {
+    "structured_parse_success_rate": 0.9666666666666667,
+    "median_latency_ms": 6390.6
+  },
+  "baselines": {
+    "raw": {
+      "R@1": 0.6,
+      "R@5": 0.7833333333333333,
+      "R@10": 0.8333333333333334
+    },
+    "generated": {
+      "R@1": 0.6666666666666666,
+      "R@5": 0.85,
+      "R@10": 0.8833333333333333
+    }
+  },
+  "raw_generated_top1_complementarity": {
+    "both_correct": 31,
+    "raw_only_correct": 5,
+    "generated_only_correct": 9,
+    "neither_correct": 15
+  },
+  "selected_strategy": {
+    "name": "linear_raw_0.55",
+    "family": "linear",
+    "params": {
+      "alpha_raw": 0.55,
+      "alpha_generated": 0.44999999999999996
+    },
+    "R@1": 0.7333333333333333,
+    "R@5": 0.85,
+    "R@10": 0.8833333333333333
+  },
+  "selected_minus_raw_R@1_bootstrap": {
+    "delta": 0.13333333333333333,
+    "ci95_low": 0.016666666666666666,
+    "ci95_high": 0.25,
+    "prob_delta_gt_0": 0.98365
+  },
+  "selected_minus_generated_R@1_bootstrap": {
+    "delta": 0.06666666666666667,
+    "ci95_low": 0.016666666666666666,
+    "ci95_high": 0.13333333333333333,
+    "prob_delta_gt_0": 0.98565
+  },
+  "per_label": {
+    "SUPPORTED": {
+      "raw": {
+        "R@1": 0.717391304347826,
+        "R@5": 0.8478260869565217,
+        "R@10": 0.8695652173913043
+      },
+      "generated": {
+        "R@1": 0.717391304347826,
+        "R@5": 0.8913043478260869,
+        "R@10": 0.8913043478260869
+      },
+      "selected": {
+        "R@1": 0.782608695652174,
+        "R@5": 0.8913043478260869,
+        "R@10": 0.9130434782608695
+      }
+    },
+    "CONTRADICTED": {
+      "raw": {
+        "R@1": 0.21428571428571427,
+        "R@5": 0.5714285714285714,
+        "R@10": 0.7142857142857143
+      },
+      "generated": {
+        "R@1": 0.5,
+        "R@5": 0.7142857142857143,
+        "R@10": 0.8571428571428571
+      },
+      "selected": {
+        "R@1": 0.5714285714285714,
+        "R@5": 0.7142857142857143,
+        "R@10": 0.7857142857142857
+      }
+    }
+  }
+}

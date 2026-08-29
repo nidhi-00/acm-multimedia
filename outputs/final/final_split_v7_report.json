@@ -1,0 +1,47 @@
+{
+  "purpose": "Fresh post-V6 development and final holdout. V7 DEV and V7 TEST are sampled exclusively from the untouched 248-example V6 TRAIN pool. V7 TEST is not evaluated by this job.",
+  "source_pool": {
+    "queries": 248,
+    "label_counts": {
+      "SUPPORTED": 191,
+      "CONTRADICTED": 57
+    }
+  },
+  "splits": {
+    "train": {
+      "queries": 128,
+      "evidence_docs": 127,
+      "label_counts": {
+        "SUPPORTED": 99,
+        "CONTRADICTED": 29
+      }
+    },
+    "dev": {
+      "queries": 60,
+      "evidence_docs": 60,
+      "label_counts": {
+        "SUPPORTED": 46,
+        "CONTRADICTED": 14
+      }
+    },
+    "test": {
+      "queries": 60,
+      "evidence_docs": 60,
+      "label_counts": {
+        "SUPPORTED": 46,
+        "CONTRADICTED": 14
+      }
+    }
+  },
+  "evidence_leakage": {
+    "train_dev": 0,
+    "train_test": 0,
+    "dev_test": 0
+  },
+  "v7_dev_prior_v6_split_counts": {
+    "train": 60
+  },
+  "v7_test_prior_v6_split_counts": {
+    "train": 60
+  }
+}

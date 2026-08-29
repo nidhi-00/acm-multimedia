@@ -1,0 +1,75 @@
+{
+  "benchmark": {
+    "manually_reviewed_images": 120,
+    "included_images": 116,
+    "excluded_images": 4,
+    "excluded_indices": [
+      61,
+      68,
+      72,
+      114
+    ],
+    "annotation_policy": "Gold transcription contains prominent claim-bearing/headline/caption text visible in the image. Logos, usernames, timestamps, platform chrome, fact-check stamps, and incidental tiny body text are excluded unless they are part of the claim. Truncated source captions are transcribed only as visibly shown.",
+    "script_distribution": {
+      "latin_romanized": 114,
+      "mixed_devanagari_latin": 2
+    }
+  },
+  "hi_en_easyocr": {
+    "macro_mean_CER": 0.5727773921043524,
+    "median_CER": 0.28101503759398494,
+    "micro_CER": 0.5266174801362089,
+    "macro_mean_WER": 0.8317402571182263,
+    "median_WER": 0.44281045751633985,
+    "micro_WER": 0.6991869918699187
+  },
+  "en_only_easyocr": {
+    "macro_mean_CER": 0.5333924941728525,
+    "median_CER": 0.2631578947368421,
+    "micro_CER": 0.4753688989784336,
+    "macro_mean_WER": 0.7537302010801248,
+    "median_WER": 0.3684210526315789,
+    "micro_WER": 0.6247154471544716
+  },
+  "paired_comparison": {
+    "CER": {
+      "en_only_wins": 85,
+      "hi_en_wins": 22,
+      "ties": 9,
+      "bootstrap": {
+        "mean_delta_en_only_minus_hi_en": -0.03938489793149976,
+        "ci95_low": -0.056129515297381055,
+        "ci95_high": -0.022859408807570324,
+        "prob_en_only_better": 1.0
+      }
+    },
+    "WER": {
+      "en_only_wins": 79,
+      "hi_en_wins": 17,
+      "ties": 20,
+      "bootstrap": {
+        "mean_delta_en_only_minus_hi_en": -0.07801005603810195,
+        "ci95_low": -0.10146136697469559,
+        "ci95_high": -0.05527473136385696,
+        "prob_en_only_better": 1.0
+      }
+    }
+  },
+  "per_script_macro_mean": {
+    "latin_romanized": {
+      "n": 114,
+      "hi_en_CER": 0.5627148645375053,
+      "en_only_CER": 0.5206777996618356,
+      "hi_en_WER": 0.8165076300501252,
+      "en_only_WER": 0.7410201146393351
+    },
+    "mixed_devanagari_latin": {
+      "n": 2,
+      "hi_en_CER": 1.1463414634146343,
+      "en_only_CER": 1.258130081300813,
+      "hi_en_WER": 1.7,
+      "en_only_WER": 1.4782051282051283
+    }
+  },
+  "recommended_default": "EasyOCR English-only for the current HinglishMemeX demo corpus. It has lower CER/WER overall and avoids widespread false Devanagari decoding. Keep a Hindi-capable fallback only if future inputs are detected as genuinely Devanagari-heavy."
+}
