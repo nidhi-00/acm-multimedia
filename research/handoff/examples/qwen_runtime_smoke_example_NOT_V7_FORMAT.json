@@ -1,0 +1,14 @@
+{
+  "note": "Deployment smoke test only; NOT the frozen V7 prompt/format.",
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "revision": null,
+  "gpu": "NVIDIA GeForce GTX 1080 Ti",
+  "torch": "2.6.0+cu118",
+  "model_load_seconds": 199.61121818004176,
+  "gpu_allocated_gb_after_load": 5.748985767364502,
+  "structured_parse_rate": 1.0,
+  "schema_success_rate": 1.0,
+  "median_generation_latency_ms": 3445.6601759884506,
+  "representative_input": "Mumbai mein airport band hai kya? Viral post keh raha hai flights cancel ho gayi.",
+  "representative_raw_output": "{\n  \"normalized_text\": \"mumbai mein airport band hai kya flights cancel ho gayi\",\n  \"retrieval_text\": \"airport closure mumbai flights cancellation\",\n  \"claims\": [{\"claim\": \"flights in mumbai have been canceled\"}]\n}"
+}

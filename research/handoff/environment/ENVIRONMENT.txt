@@ -1,0 +1,16 @@
+Observed environments:
+
+Local production OCR smoke:
+- Python 3.11.9
+- EasyOCR 1.7.2
+- PyTorch 2.13.0+cpu
+- NumPy 1.26.4
+
+Ada Qwen smoke:
+- Qwen/Qwen2.5-3B-Instruct
+- GTX 1080 Ti
+- torch 2.6.0+cu118
+- ~5.75 GiB allocated after load
+- median generation ~3.45 s across 5 smoke examples
+
+V7-era research environment used Python 3.11 with the pinned/declared package constraints inside the handed-off batch scripts. Not every transitive dependency was historically pinned, so treat the scripts as the authoritative environment specification.
