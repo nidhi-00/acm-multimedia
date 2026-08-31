@@ -1,0 +1,16 @@
+{
+    "important_note":  "This is an actual frozen V7 normalization input/output pair. It is distinct from the later deployment JSON smoke test.",
+    "benchmark":  "V7_FINAL_FROZEN",
+    "source_file":  "v7_final_normalization_outputs.csv",
+    "query_id":  "hmx-0000",
+    "normalization_model":  "Qwen/Qwen2.5-3B-Instruct",
+    "huggingface_revision":  null,
+    "output_format":  "V7 tag-based format: \u003cNORMALIZED\u003e, \u003cLANGUAGES\u003e, \u003cCLAIM\u003e, \u003cRETRIEVAL\u003e",
+    "input":  "Jagannath Puri temple ka khazana vault 46 saal baad khula: Secret chamber ke andar kya hai?",
+    "raw_model_output":  "\u003cNORMALIZED\u003eJagannath Puri temple\u0027s khazana vault opened 46 years later: What is inside the secret chamber?\u003c/NORMALIZED\u003e\n\u003cLANGUAGES\u003eHindi, English\u003c/LANGUAGES\u003e\n\u003cCLAIM\u003eThe secret chamber of Jagannath Puri temple\u0027s khazana vault contains valuable items.\u003c/CLAIM\u003e\n\u003cRETRIEVAL\u003eWhat is inside the secret chamber of Jagannath Puri temple\u0027s khazana vault?\u003c/RETRIEVAL\u003e",
+    "normalized_text":  "Jagannath Puri temple\u0027s khazana vault opened 46 years later: What is inside the secret chamber?",
+    "languages":  "Hindi, English",
+    "claim_text":  "The secret chamber of Jagannath Puri temple\u0027s khazana vault contains valuable items.",
+    "retrieval_text":  "What is inside the secret chamber of Jagannath Puri temple\u0027s khazana vault?",
+    "structured_parse_success":  "True"
+}
