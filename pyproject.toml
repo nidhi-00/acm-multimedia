@@ -9,7 +9,7 @@ description = "Mock-first Gradio demo for VerifyHinglish"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "gradio>=6,<7",
+    "gradio==6.26.0",
     "pydantic>=2.8,<3",
 ]
 

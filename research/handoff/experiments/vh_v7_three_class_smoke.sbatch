@@ -112,6 +112,7 @@ assert torch.__version__.startswith("2.6.0"), torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
 assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
 assert torch.cuda.is_available()
+assert importlib.metadata.version("gradio") == "6.26.0"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
@@ -160,6 +161,7 @@ assert torch.__version__.startswith("2.6.0"), torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
 assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
 assert torch.cuda.is_available()
+assert importlib.metadata.version("gradio") == "6.26.0"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
@@ -170,6 +172,7 @@ print("CUDA available:", torch.cuda.is_available())
 print("Torch:", torch.__version__)
 print("Torch CUDA build:", torch.version.cuda)
 print("torchvision:", torchvision.__version__)
+print("Gradio:", importlib.metadata.version("gradio"))
 print("Transformers:", importlib.metadata.version("transformers"))
 print("SentenceTransformers:", importlib.metadata.version("sentence-transformers"))
 print("Qwen class import:", Qwen2ForCausalLM.__name__)
