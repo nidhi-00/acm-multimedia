@@ -17,8 +17,7 @@ class OcrResult:
 
 
 class OcrEngine(Protocol):
-    def extract(self, image_path: str) -> OcrResult:
-        ...
+    def extract(self, image_path: str) -> OcrResult: ...
 
 
 def detections_to_text(
@@ -61,9 +60,7 @@ def detections_to_text(
 
     text = " ".join(item[2] for item in ordered)
 
-    mean_confidence = sum(
-        item[3] for item in ordered
-    ) / len(ordered)
+    mean_confidence = sum(item[3] for item in ordered) / len(ordered)
 
     return text, mean_confidence
 
@@ -103,11 +100,7 @@ class EasyOcrEngine:
                     'Install the project with the "real" extra.'
                 ) from exc
 
-            use_gpu = (
-                torch.cuda.is_available()
-                if self._gpu is None
-                else self._gpu
-            )
+            use_gpu = torch.cuda.is_available() if self._gpu is None else self._gpu
 
             kwargs: dict[str, Any] = {
                 "gpu": use_gpu,
@@ -119,9 +112,7 @@ class EasyOcrEngine:
                     parents=True,
                     exist_ok=True,
                 )
-                kwargs["model_storage_directory"] = str(
-                    self._model_storage_directory
-                )
+                kwargs["model_storage_directory"] = str(self._model_storage_directory)
 
             self._reader = easyocr.Reader(
                 ["en"],
@@ -134,9 +125,7 @@ class EasyOcrEngine:
         path = Path(image_path)
 
         if not path.is_file():
-            raise FileNotFoundError(
-                f"OCR input image does not exist: {path}"
-            )
+            raise FileNotFoundError(f"OCR input image does not exist: {path}")
 
         reader = self._load_reader()
 
@@ -157,13 +146,9 @@ class EasyOcrEngine:
             mag_ratio=1.25,
         )
 
-        latency_ms = round(
-            (perf_counter() - start) * 1000
-        )
+        latency_ms = round((perf_counter() - start) * 1000)
 
-        text, confidence = detections_to_text(
-            detections
-        )
+        text, confidence = detections_to_text(detections)
 
         return OcrResult(
             text=text,

@@ -20,9 +20,7 @@ def test_detections_are_sorted_into_reading_order() -> None:
         ),
     ]
 
-    text, confidence = detections_to_text(
-        detections
-    )
+    text, confidence = detections_to_text(detections)
 
     assert text == "Hello world again"
     assert confidence is not None

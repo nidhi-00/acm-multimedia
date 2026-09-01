@@ -68,10 +68,14 @@ def launch_options(gr: Any) -> dict[str, Any]:
 def main() -> None:
     import gradio as gr
 
-    backend_mode = os.environ.get(
-        "VERIFYHINGLISH_BACKEND",
-        "mock",
-    ).strip().lower()
+    backend_mode = (
+        os.environ.get(
+            "VERIFYHINGLISH_BACKEND",
+            "mock",
+        )
+        .strip()
+        .lower()
+    )
 
     backend_factory: BackendFactory | None = None
 
@@ -79,13 +83,9 @@ def main() -> None:
         backend = RealBackend()
         backend_factory = lambda _scenario: backend
     elif backend_mode != "mock":
-        raise ValueError(
-            "VERIFYHINGLISH_BACKEND must be 'mock' or 'real'"
-        )
+        raise ValueError("VERIFYHINGLISH_BACKEND must be 'mock' or 'real'")
 
-    build_app(
-        backend_factory=backend_factory
-    ).launch(**launch_options(gr))
+    build_app(backend_factory=backend_factory).launch(**launch_options(gr))
 
 
 if __name__ == "__main__":
