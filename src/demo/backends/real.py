@@ -7,6 +7,7 @@ from time import perf_counter
 from demo.contracts import (
     Claim,
     FinalVerdict,
+    EvidenceItem,
     InputSummary,
     LanguageSegment,
     Latency,
@@ -16,6 +17,7 @@ from demo.contracts import (
 )
 from demo.pipeline.normalization import Normalizer, QwenV7Normalizer
 from demo.pipeline.ocr import EasyOcrEngine, OcrEngine
+from demo.pipeline.retrieval import Retriever, V7TextRetriever
 
 
 class RealBackend:
@@ -26,9 +28,11 @@ class RealBackend:
         *,
         ocr_engine: OcrEngine | None = None,
         normalizer: Normalizer | None = None,
+        retriever: Retriever | None = None,
     ) -> None:
         self.ocr_engine = ocr_engine if ocr_engine is not None else EasyOcrEngine()
         self.normalizer = normalizer if normalizer is not None else QwenV7Normalizer()
+        self.retriever = retriever if retriever is not None else V7TextRetriever()
 
     def verify(
         self,
@@ -50,6 +54,8 @@ class RealBackend:
 
         normalization_input = request.post_text or ocr_text
         normalization = None
+        evidence: list[EvidenceItem] = []
+        retrieval_ms = None
 
         if normalization_input is None:
             warnings.append(
@@ -64,10 +70,33 @@ class RealBackend:
                     "The frozen Qwen V7 normalization output was malformed; "
                     "normalized analysis was withheld."
                 )
+            else:
+                retrieval_started = perf_counter()
+                retrieval = self.retriever.retrieve(
+                    raw_query=normalization_input,
+                    generated_query=normalization.retrieval_text,
+                    top_k=request.top_k,
+                )
+                retrieval_ms = round((perf_counter() - retrieval_started) * 1000)
+                warnings.extend(retrieval.warnings)
+                evidence = [
+                    EvidenceItem(
+                        evidence_id=item.evidence_id,
+                        rank=item.rank,
+                        title=item.title,
+                        source_name=item.source_name,
+                        source_url=item.source_url,
+                        snippet=item.snippet,
+                        image_path=None,
+                        text_score=item.text_score,
+                        image_score=None,
+                        combined_score=None,
+                        evidence_verdict=None,
+                    )
+                    for item in retrieval.items
+                ]
 
-        warnings.append(
-            "Evidence retrieval and final verification are not connected yet."
-        )
+        warnings.append("Final verification is not connected yet.")
 
         total_ms = round((perf_counter() - started) * 1000)
 
@@ -98,18 +127,18 @@ class RealBackend:
                 ),
                 visual_description=None,
             ),
-            evidence=[],
+            evidence=evidence,
             verdict=FinalVerdict.INSUFFICIENT_EVIDENCE,
             confidence=None,
             explanation=(
-                "The post was read successfully, but evidence retrieval "
-                "and final claim verification are not enabled in this "
-                "integration milestone."
+                "The post was analyzed and text evidence was retrieved when "
+                "possible, but final claim verification is not enabled in "
+                "this integration milestone."
             ),
             warnings=warnings,
             latency=Latency(
                 total_ms=total_ms,
-                retrieval_ms=None,
+                retrieval_ms=retrieval_ms,
                 verification_ms=None,
             ),
         )
