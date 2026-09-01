@@ -1,0 +1,2 @@
+9d0b3e5acb2e60000e872dae3c76710c94d273bbeccfa87c913819d816c9b15e  data/text_evidence.csv
+7b884943286858142c43e80a639b6c2a21807bab73d2172bfba8a76795f8b9e9  outputs/text_evidence_embeddings.npy
