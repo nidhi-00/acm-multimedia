@@ -17,9 +17,13 @@ fi
 
 REPO="${SLURM_SUBMIT_DIR:-$PWD}"
 PERSIST_ROOT="$VH_PERSIST_ROOT"
-ENV="${VH_ENV_DIR:-$PERSIST_ROOT/env}"
+ENV="$PERSIST_ROOT/env"
 PY="$ENV/bin/python"
 READY_MARKER="$ENV/.verifyhinglish-v7-real-ready"
+UV_BIN="${UV_BIN:-$HOME/.local/bin/uv}"
+
+export UV_PYTHON_INSTALL_DIR="${UV_PYTHON_INSTALL_DIR:-$PERSIST_ROOT/python}"
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$PERSIST_ROOT/uv-cache}"
 
 test -f "$REPO/pyproject.toml"
 test -f "$REPO/data/text_evidence.csv"
@@ -45,41 +49,84 @@ mkdir -p \
   "$HF_HUB_CACHE" \
   "$SENTENCE_TRANSFORMERS_HOME" \
   "$TORCH_HOME" \
-  "$PIP_CACHE_DIR"
+  "$PIP_CACHE_DIR" \
+  "$UV_PYTHON_INSTALL_DIR" \
+  "$UV_CACHE_DIR"
+
+if [ ! -x "$UV_BIN" ]; then
+    echo "ERROR: uv is unavailable at $UV_BIN." >&2
+    echo "Set UV_BIN to the confirmed uv 0.12.8 executable and resubmit." >&2
+    exit 2
+fi
 
 echo "Repository: $REPO"
 echo "Persistent root: $PERSIST_ROOT"
 echo "Python environment: $ENV"
+echo "uv executable: $UV_BIN"
+echo "UV_PYTHON_INSTALL_DIR: $UV_PYTHON_INSTALL_DIR"
+echo "UV_CACHE_DIR: $UV_CACHE_DIR"
 echo "HF_HOME: $HF_HOME"
 echo "SENTENCE_TRANSFORMERS_HOME: $SENTENCE_TRANSFORMERS_HOME"
 echo "TORCH_HOME: $TORCH_HOME"
+"$UV_BIN" --version
 
-if [ ! -x "$PY" ]; then
-    command -v conda >/dev/null 2>&1 || {
-        echo "ERROR: conda is required to create the frozen Python 3.11 environment." >&2
-        exit 2
-    }
-
-    source "$(conda info --base)/etc/profile.d/conda.sh"
-
-    conda create \
-      -p "$ENV" \
-      python=3.11 \
-      pip \
-      -y
+if ! PYTHON_311="$("$UV_BIN" python find 3.11.9 2>/dev/null)"; then
+    echo "Installing persistent Python 3.11.9 with uv."
+    "$UV_BIN" python install 3.11.9
+    PYTHON_311="$("$UV_BIN" python find 3.11.9)"
+else
+    echo "Reusing persistent Python 3.11.9: $PYTHON_311"
 fi
 
-if [ ! -f "$READY_MARKER" ]; then
-    "$PY" -m pip install \
+if [ ! -x "$PY" ]; then
+    echo "Creating persistent virtual environment with uv."
+    "$UV_BIN" venv \
+      --python "$PYTHON_311" \
+      "$ENV"
+fi
+
+"$PY" - <<'PY'
+import sys
+
+assert sys.version_info[:3] == (3, 11, 9), sys.version
+PY
+
+environment_is_valid() {
+    "$PY" - <<'PY' >/dev/null 2>&1
+import importlib.metadata
+import sys
+
+from packaging.version import Version
+
+import demo
+import torch
+
+
+assert sys.version_info[:3] == (3, 11, 9), sys.version
+assert torch.__version__.split("+", 1)[0] == "2.6.0", torch.__version__
+assert torch.version.cuda == "11.8", torch.version.cuda
+assert importlib.metadata.version("sentence-transformers") == "3.4.1"
+assert importlib.metadata.version("easyocr") == "1.7.2"
+assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
+PY
+}
+
+if [ -f "$READY_MARKER" ] && environment_is_valid; then
+    echo "Reusing the existing frozen real-runtime environment."
+else
+    rm -f "$READY_MARKER"
+
+    "$UV_BIN" pip install \
+      --python "$PY" \
       torch==2.6.0 \
       --index-url https://download.pytorch.org/whl/cu118
 
-    "$PY" -m pip install \
+    "$UV_BIN" pip install \
+      --python "$PY" \
       -e "$REPO[real]"
 
+    environment_is_valid
     touch "$READY_MARKER"
-else
-    echo "Reusing the existing frozen real-runtime environment."
 fi
 
 "$PY" - <<'PY'
@@ -91,14 +138,17 @@ from packaging.version import Version
 import torch
 
 
-assert sys.version_info[:2] == (3, 11), sys.version
+assert sys.version_info[:3] == (3, 11, 9), sys.version
 assert torch.__version__.split("+", 1)[0] == "2.6.0", torch.__version__
+assert torch.version.cuda == "11.8", torch.version.cuda
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
 
 print("Python:", sys.version.split()[0])
+print("CUDA available:", torch.cuda.is_available())
 print("Torch:", torch.__version__)
+print("Torch CUDA build:", torch.version.cuda)
 print("Transformers:", importlib.metadata.version("transformers"))
 print("SentenceTransformers:", importlib.metadata.version("sentence-transformers"))
 PY
