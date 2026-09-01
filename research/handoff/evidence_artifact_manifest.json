@@ -1,0 +1,34 @@
+﻿{
+  "artifact_set": "V7_FROZEN_TEXT_EVIDENCE",
+  "row_alignment": {
+    "csv_rows": 439,
+    "embedding_rows": 439,
+    "embedding_dimensions": 384,
+    "embedding_dtype": "float32",
+    "important": "Row i in data/text_evidence.csv corresponds exactly to row i in outputs/text_evidence_embeddings.npy. Do not reorder either artifact independently."
+  },
+  "contract_mapping": {
+    "title": "evidence_title",
+    "source_name": "evidence_source_name",
+    "snippet": "evidence_search_text",
+    "source_url": "normalized_evidence_url"
+  },
+  "verifier_text_precedence": [
+    "evidence_search_text",
+    "source_text",
+    "evidence_text",
+    "article_text",
+    "content",
+    "text"
+  ],
+  "verifier_url_precedence": [
+    "normalized_evidence_url",
+    "evidence_url",
+    "source_url",
+    "url"
+  ],
+  "sha256": {
+    "data/text_evidence.csv": "9d0b3e5acb2e60000e872dae3c76710c94d273bbeccfa87c913819d816c9b15e",
+    "outputs/text_evidence_embeddings.npy": "7b884943286858142c43e80a639b6c2a21807bab73d2172bfba8a76795f8b9e9"
+  }
+}
