@@ -51,10 +51,24 @@ class RetrievedEvidence:
 
 
 @dataclass(frozen=True)
+class RankedEvidence:
+    """One entry in the complete frozen ranking used by the verifier."""
+
+    evidence_id: str
+    rank: int
+    evidence_text: str
+    source_url: str | None
+    title: str | None
+    source_name: str | None
+    text_score: float
+
+
+@dataclass(frozen=True)
 class RetrievalResult:
     """Retrieved evidence plus non-fatal metadata warnings."""
 
     items: tuple[RetrievedEvidence, ...]
+    ranked_candidates: tuple[RankedEvidence, ...] = ()
     warnings: tuple[str, ...] = ()
 
 
@@ -315,8 +329,6 @@ class V7TextRetriever:
     ) -> RetrievalResult:
         if top_k < 0:
             raise ValueError("top_k must be non-negative")
-        if top_k == 0:
-            return RetrievalResult(items=())
         if not isinstance(raw_query, str) or not raw_query.strip():
             raise ValueError("raw_query must be non-empty")
         if not isinstance(generated_query, str) or not generated_query.strip():
@@ -356,15 +368,37 @@ class V7TextRetriever:
         ranked_indices = np.argsort(-fused_scores)
 
         items: list[RetrievedEvidence] = []
+        ranked_candidates: list[RankedEvidence] = []
         warnings: list[str] = []
 
         for rank, candidate_index in enumerate(ranked_indices, start=1):
             row = artifacts.candidate_rows[int(candidate_index)]
+            evidence_id = _metadata_value(row, "evidence_doc_id")
+            title = _metadata_value(row, "evidence_title") or None
+            source_name = _metadata_value(row, "evidence_source_name") or None
+            evidence_text = _metadata_value(row, "evidence_search_text")
+            source_url = _metadata_value(row, "normalized_evidence_url") or None
+            text_score = float(fused_scores[int(candidate_index)])
+            ranked_candidates.append(
+                RankedEvidence(
+                    evidence_id=evidence_id,
+                    rank=rank,
+                    evidence_text=evidence_text,
+                    source_url=source_url,
+                    title=title,
+                    source_name=source_name,
+                    text_score=text_score,
+                )
+            )
+
+            if len(items) == top_k:
+                continue
+
             required_metadata = {
-                "evidence_doc_id": _metadata_value(row, "evidence_doc_id"),
-                "evidence_title": _metadata_value(row, "evidence_title"),
-                "evidence_source_name": _metadata_value(row, "evidence_source_name"),
-                "evidence_search_text": _metadata_value(row, "evidence_search_text"),
+                "evidence_doc_id": evidence_id,
+                "evidence_title": title or "",
+                "evidence_source_name": source_name or "",
+                "evidence_search_text": evidence_text,
             }
             missing_metadata = [
                 name for name, value in required_metadata.items() if not value
@@ -380,7 +414,6 @@ class V7TextRetriever:
                 )
                 continue
 
-            source_url = _metadata_value(row, "normalized_evidence_url") or None
             items.append(
                 RetrievedEvidence(
                     evidence_id=required_metadata["evidence_doc_id"],
@@ -389,14 +422,12 @@ class V7TextRetriever:
                     source_name=required_metadata["evidence_source_name"],
                     snippet=required_metadata["evidence_search_text"],
                     source_url=source_url,
-                    text_score=float(fused_scores[int(candidate_index)]),
+                    text_score=text_score,
                 )
             )
 
-            if len(items) == top_k:
-                break
-
         return RetrievalResult(
             items=tuple(items),
+            ranked_candidates=tuple(ranked_candidates),
             warnings=tuple(warnings),
         )

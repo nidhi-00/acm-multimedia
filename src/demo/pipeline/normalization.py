@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
-import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from threading import Lock
 from typing import Any, Protocol
 
+from demo.pipeline.qwen import (
+    QWEN_MAX_INPUT_TOKENS,
+    QWEN_MODEL_ID,
+    QwenRuntime,
+    QwenV7Runtime,
+)
 
-QWEN_MODEL_ID = "Qwen/Qwen2.5-3B-Instruct"
-QWEN_MAX_INPUT_TOKENS = 3000
+
 QWEN_MAX_NEW_TOKENS = 190
 
 NORMALIZATION_SYSTEM_PROMPT = """
@@ -126,107 +129,25 @@ def parse_normalization(raw: str, original: str) -> NormalizationResult | None:
 
 
 class QwenV7Normalizer:
-    """Lazy, reusable adapter for the frozen CUDA Qwen V7 normalizer."""
+    """Adapter for frozen V7 normalization through a reusable Qwen runtime."""
 
-    def __init__(self, *, cache_dir: str | Path | None = None) -> None:
-        self._cache_dir = Path(cache_dir) if cache_dir is not None else None
-        self._tokenizer: Any | None = None
-        self._model: Any | None = None
-        self._torch: Any | None = None
-        self._load_lock = Lock()
-        self._generation_lock = Lock()
-
-    def _load(self) -> tuple[Any, Any, Any]:
-        if (
-            self._tokenizer is not None
-            and self._model is not None
-            and self._torch is not None
-        ):
-            return self._tokenizer, self._model, self._torch
-
-        with self._load_lock:
-            if (
-                self._tokenizer is not None
-                and self._model is not None
-                and self._torch is not None
-            ):
-                return self._tokenizer, self._model, self._torch
-
-            try:
-                import torch
-                from transformers import AutoModelForCausalLM, AutoTokenizer
-            except ImportError as exc:
-                raise RuntimeError(
-                    "Real normalization dependencies are not installed. "
-                    'Install the project with the "real" extra.'
-                ) from exc
-
-            if not torch.cuda.is_available():
-                raise RuntimeError("The frozen V7 Qwen normalizer requires a CUDA GPU.")
-
-            cache_dir = self._cache_dir
-            if cache_dir is None and os.environ.get("HF_HOME"):
-                cache_dir = Path(os.environ["HF_HOME"])
-
-            load_kwargs: dict[str, Any] = {}
-            if cache_dir is not None:
-                load_kwargs["cache_dir"] = str(cache_dir)
-
-            tokenizer = AutoTokenizer.from_pretrained(
-                QWEN_MODEL_ID,
-                **load_kwargs,
-            )
-            model = AutoModelForCausalLM.from_pretrained(
-                QWEN_MODEL_ID,
-                dtype=torch.float16,
-                attn_implementation="eager",
-                **load_kwargs,
-            ).to("cuda")
-            model.eval()
-
-            self._tokenizer = tokenizer
-            self._model = model
-            self._torch = torch
-
-        return tokenizer, model, torch
+    def __init__(
+        self,
+        *,
+        runtime: QwenRuntime | None = None,
+        cache_dir: str | Path | None = None,
+    ) -> None:
+        self.runtime = runtime or QwenV7Runtime(cache_dir=cache_dir)
 
     def normalize(self, text: str) -> NormalizationResult | None:
         original = _clean(text)
         if not original:
             return None
 
-        tokenizer, model, torch = self._load()
-
-        with self._generation_lock:
-            prompt = tokenizer.apply_chat_template(
-                [
-                    {"role": "system", "content": NORMALIZATION_SYSTEM_PROMPT},
-                    {"role": "user", "content": f"INPUT:\n{original}"},
-                ],
-                tokenize=False,
-                add_generation_prompt=True,
-            )
-
-            model_input = tokenizer(
-                prompt,
-                return_tensors="pt",
-                truncation=True,
-                max_length=QWEN_MAX_INPUT_TOKENS,
-            ).to("cuda")
-
-            with torch.inference_mode():
-                generated = model.generate(
-                    **model_input,
-                    max_new_tokens=QWEN_MAX_NEW_TOKENS,
-                    do_sample=False,
-                    pad_token_id=tokenizer.eos_token_id,
-                )
-
-            torch.cuda.synchronize()
-
-            raw = tokenizer.decode(
-                generated[0, model_input["input_ids"].shape[1] :],
-                skip_special_tokens=True,
-            )
+        raw = self.runtime.generate(
+            system_prompt=NORMALIZATION_SYSTEM_PROMPT,
+            user_prompt=f"INPUT:\n{original}",
+            max_new_tokens=QWEN_MAX_NEW_TOKENS,
+        )
 
         return parse_normalization(raw, original)

@@ -163,6 +163,16 @@ def test_exact_fusion_ranking_candidate_filtering_and_metadata(tmp_path: Path) -
     assert result.items[0].source_name == "Source A"
     assert result.items[0].snippet == "Snippet A"
     assert result.items[0].source_url == "https://a.test"
+    assert [item.evidence_id for item in result.ranked_candidates] == [
+        "doc-a",
+        "doc-b",
+        "doc-c",
+    ]
+    assert [item.evidence_text for item in result.ranked_candidates] == [
+        "Snippet A",
+        "Snippet B",
+        "Snippet C",
+    ]
     assert result.warnings == ()
     assert encoder.calls == [
         (
@@ -176,18 +186,17 @@ def test_exact_fusion_ranking_candidate_filtering_and_metadata(tmp_path: Path) -
     ]
 
 
-def test_top_k_zero_and_limit(tmp_path: Path) -> None:
+def test_top_k_controls_public_items_but_not_internal_ranking(tmp_path: Path) -> None:
     retriever, encoder, _ = _build_retriever(tmp_path)
 
-    assert (
-        retriever.retrieve(
-            raw_query="raw",
-            generated_query="generated",
-            top_k=0,
-        ).items
-        == ()
+    hidden = retriever.retrieve(
+        raw_query="raw",
+        generated_query="generated",
+        top_k=0,
     )
-    assert encoder.calls == []
+    assert hidden.items == ()
+    assert [item.rank for item in hidden.ranked_candidates] == [1, 2, 3]
+    assert len(encoder.calls) == 1
 
     result = retriever.retrieve(
         raw_query="raw",
@@ -210,6 +219,10 @@ def test_invalid_required_metadata_is_skipped_without_rank_fabrication(
 
     assert [item.evidence_id for item in result.items] == ["doc-b", "doc-c"]
     assert [item.rank for item in result.items] == [2, 3]
+    assert result.ranked_candidates[0].evidence_id == "doc-a"
+    assert result.ranked_candidates[0].rank == 1
+    assert result.ranked_candidates[0].title is None
+    assert result.ranked_candidates[0].evidence_text == "Snippet A"
     assert len(result.warnings) == 1
     assert "evidence_title" in result.warnings[0]
     assert "doc-a" in result.warnings[0]
