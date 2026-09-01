@@ -68,7 +68,7 @@ def workspace_intro_markup() -> str:
   <p>Upload the content exactly as you saw it online. Keep the original wording—the distinction between the shared post and its interpreted claim matters.</p>
   <div class="vh-workspace-disclosure">
     <span aria-hidden="true"></span>
-    <p>This build demonstrates the complete verification experience with prepared results. Live OCR, evidence retrieval, and verification are not connected yet.</p>
+    <p>Images are read through OCR for embedded Romanized Hindi-English text. Evidence retrieval is text-only; broader Devanagari and visual-semantic matching are future work.</p>
   </div>
   <div class="vh-workspace-path" aria-label="Verification result structure">
     <span><b>01</b> Provide post</span><i aria-hidden="true"></i>

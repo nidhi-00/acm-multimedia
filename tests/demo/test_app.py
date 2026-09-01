@@ -43,3 +43,16 @@ def test_user_facing_pages_do_not_expose_developer_fixture_language() -> None:
     assert "minimal_valid" not in visible_copy
     assert "Verify content" in visible_copy
     assert "Try an example" in visible_copy
+
+
+def test_user_facing_scope_copy_matches_the_real_pipeline() -> None:
+    visible_copy = " ".join([landing_markup(), workspace_intro_markup()])
+
+    assert "Romanized Hindi + English" in visible_copy
+    assert "broader Devanagari support" in visible_copy
+    assert "OCR for image text" in visible_copy
+    assert "Textual evidence retrieval" in visible_copy
+    assert "Devanagari + English" not in visible_copy
+    assert "Visual 0.94" not in visible_copy
+    assert "visual match points" not in visible_copy.lower()
+    assert "textual and visual evidence" not in visible_copy.lower()
