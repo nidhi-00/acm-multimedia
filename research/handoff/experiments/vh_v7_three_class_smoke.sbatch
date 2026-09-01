@@ -98,16 +98,24 @@ import sys
 
 from packaging.version import Version
 
+import easyocr
+import sentence_transformers
 import demo
 import torch
+import torchvision
+import transformers
+from transformers import Qwen2ForCausalLM
 
 
 assert sys.version_info[:3] == (3, 11, 9), sys.version
-assert torch.__version__.split("+", 1)[0] == "2.6.0", torch.__version__
+assert torch.__version__.startswith("2.6.0"), torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
+assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torch.cuda.is_available()
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
+assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
 PY
 }
 
@@ -116,9 +124,13 @@ if [ -f "$READY_MARKER" ] && environment_is_valid; then
 else
     rm -f "$READY_MARKER"
 
+    # Force both wheels because a stale +cu124 local build can otherwise
+    # satisfy the public ==0.21.0 version while remaining CUDA-incompatible.
     "$UV_BIN" pip install \
       --python "$PY" \
+      --reinstall \
       torch==2.6.0 \
+      torchvision==0.21.0 \
       --index-url https://download.pytorch.org/whl/cu118
 
     "$UV_BIN" pip install \
@@ -135,22 +147,32 @@ import sys
 
 from packaging.version import Version
 
+import easyocr
+import sentence_transformers
 import torch
+import torchvision
+import transformers
+from transformers import Qwen2ForCausalLM
 
 
 assert sys.version_info[:3] == (3, 11, 9), sys.version
-assert torch.__version__.split("+", 1)[0] == "2.6.0", torch.__version__
+assert torch.__version__.startswith("2.6.0"), torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
+assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torch.cuda.is_available()
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
+assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
 
 print("Python:", sys.version.split()[0])
 print("CUDA available:", torch.cuda.is_available())
 print("Torch:", torch.__version__)
 print("Torch CUDA build:", torch.version.cuda)
+print("torchvision:", torchvision.__version__)
 print("Transformers:", importlib.metadata.version("transformers"))
 print("SentenceTransformers:", importlib.metadata.version("sentence-transformers"))
+print("Qwen class import:", Qwen2ForCausalLM.__name__)
 PY
 
 cd "$REPO"
