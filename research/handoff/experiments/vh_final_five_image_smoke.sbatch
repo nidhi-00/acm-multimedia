@@ -241,6 +241,7 @@ import importlib.metadata
 import json
 import os
 import platform
+import re
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
@@ -251,7 +252,11 @@ import torch
 
 from demo.backends import RealBackend
 from demo.contracts import FinalVerdict, VerificationRequest
-from demo.pipeline.normalization import QwenV7Normalizer
+from demo.pipeline.normalization import (
+    NORMALIZATION_SYSTEM_PROMPT,
+    QwenV7Normalizer,
+    parse_normalization,
+)
 from demo.pipeline.ocr import EasyOcrEngine
 from demo.pipeline.qwen import QwenV7Runtime
 from demo.pipeline.retrieval import RankedEvidence, V7TextRetriever
@@ -293,6 +298,228 @@ class CapturingVerifier:
             ranked_evidence=ranked_evidence,
         )
         return self.last_result
+
+
+class CapturingQwenRuntime:
+    """Record exact delegate generations without changing generation calls."""
+
+    def __init__(self, delegate: QwenV7Runtime) -> None:
+        self.delegate = delegate
+        self._current_query_id: str | None = None
+        self._calls: dict[str, list[dict[str, Any]]] = {}
+
+    def begin_case(self, query_id: str) -> None:
+        self._current_query_id = query_id
+        self._calls[query_id] = []
+
+    def calls_for(self, query_id: str) -> list[dict[str, Any]]:
+        return list(self._calls.get(query_id, ()))
+
+    def generate(
+        self,
+        *,
+        system_prompt: str,
+        user_prompt: str,
+        max_new_tokens: int,
+    ) -> str:
+        if self._current_query_id is None:
+            raise RuntimeError("Capturing Qwen runtime has no active query ID.")
+
+        stage = (
+            "normalization"
+            if system_prompt == NORMALIZATION_SYSTEM_PROMPT
+            else "verification"
+        )
+        record: dict[str, Any] = {
+            "stage": stage,
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "max_new_tokens": max_new_tokens,
+        }
+
+        try:
+            raw_generation = self.delegate.generate(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                max_new_tokens=max_new_tokens,
+            )
+        except Exception as exc:
+            record["generation_error"] = f"{type(exc).__name__}: {exc}"
+            self._calls[self._current_query_id].append(record)
+            raise
+
+        record["raw_generation"] = raw_generation
+        self._calls[self._current_query_id].append(record)
+        return raw_generation
+
+
+REQUIRED_NORMALIZATION_TAGS = (
+    "NORMALIZED",
+    "LANGUAGES",
+    "CLAIM",
+    "RETRIEVAL",
+)
+
+
+def clean_tag_value(value: str) -> str:
+    cleaned = re.sub(r"\s+", " ", value).strip()
+    return "" if cleaned.lower() in {"nan", "none"} else cleaned
+
+
+def normalization_diagnostic(
+    calls: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalization_calls = [call for call in calls if call["stage"] == "normalization"]
+    diagnostic: dict[str, Any] = {
+        "generation_count": len(normalization_calls),
+        "parser_accepted": False,
+        "failure_reasons": [],
+    }
+
+    if len(normalization_calls) != 1:
+        diagnostic["failure_reasons"] = [
+            "Expected exactly one production normalization generation, found "
+            f"{len(normalization_calls)}."
+        ]
+        diagnostic["calls"] = normalization_calls
+        return diagnostic
+
+    call = normalization_calls[0]
+    diagnostic.update(call)
+    user_prompt = str(call["user_prompt"])
+    input_prefix = "INPUT:\n"
+    normalization_input = (
+        user_prompt[len(input_prefix) :]
+        if user_prompt.startswith(input_prefix)
+        else user_prompt
+    )
+    diagnostic["normalization_input"] = normalization_input
+
+    raw_generation = call.get("raw_generation")
+    if not isinstance(raw_generation, str):
+        diagnostic["failure_reasons"] = [
+            "The production normalization generation did not return a string."
+        ]
+        return diagnostic
+
+    tags: dict[str, dict[str, Any]] = {}
+    for tag in REQUIRED_NORMALIZATION_TAGS:
+        opening_found = re.search(rf"<{tag}>", raw_generation, flags=re.I) is not None
+        closing_found = (
+            re.search(rf"</{tag}>", raw_generation, flags=re.I) is not None
+        )
+        pair = re.search(
+            rf"<{tag}>\s*(.*?)\s*</{tag}>",
+            raw_generation,
+            flags=re.I | re.S,
+        )
+        value = clean_tag_value(pair.group(1)) if pair is not None else ""
+
+        if pair is not None and value:
+            status = "found"
+        elif pair is not None:
+            status = "malformed_empty"
+        elif opening_found or closing_found:
+            status = "malformed_unpaired"
+        else:
+            status = "missing"
+
+        tags[tag] = {
+            "status": status,
+            "opening_tag_found": opening_found,
+            "closing_tag_found": closing_found,
+            "matched_pair": pair is not None,
+            "value": value,
+        }
+
+    language_labels = [
+        label
+        for item in str(tags["LANGUAGES"]["value"]).split(",")
+        if (label := clean_tag_value(item))
+    ]
+    if tags["LANGUAGES"]["status"] == "found" and not language_labels:
+        tags["LANGUAGES"]["status"] = "malformed_no_labels"
+
+    parsed = parse_normalization(raw_generation, normalization_input)
+    diagnostic["parser_accepted"] = parsed is not None
+    diagnostic["structured_parse_success"] = all(
+        tags[tag]["status"] == "found"
+        for tag in ("NORMALIZED", "CLAIM", "RETRIEVAL")
+    )
+    diagnostic["parsed_language_labels"] = language_labels
+    diagnostic["tags"] = tags
+    diagnostic["found_fields"] = [
+        tag for tag, details in tags.items() if details["status"] == "found"
+    ]
+    diagnostic["missing_fields"] = [
+        tag for tag, details in tags.items() if details["status"] == "missing"
+    ]
+    diagnostic["malformed_fields"] = [
+        tag
+        for tag, details in tags.items()
+        if str(details["status"]).startswith("malformed_")
+    ]
+
+    failure_reasons: list[str] = []
+    for tag in ("NORMALIZED", "CLAIM", "RETRIEVAL"):
+        if tags[tag]["status"] != "found":
+            failure_reasons.append(
+                "structured_parse_success=False because "
+                f"<{tag}>...</{tag}> did not yield a non-empty value "
+                f"(status={tags[tag]['status']})."
+            )
+    if not language_labels:
+        failure_reasons.append(
+            "languages=() because <LANGUAGES>...</LANGUAGES> did not yield "
+            f"any non-empty comma-separated labels "
+            f"(status={tags['LANGUAGES']['status']})."
+        )
+    if parsed is None and not failure_reasons:
+        failure_reasons.append(
+            "Production parse_normalization returned None despite all four "
+            "diagnostic fields appearing non-empty."
+        )
+    diagnostic["failure_reasons"] = failure_reasons
+
+    if parsed is not None:
+        diagnostic["parsed_fields"] = {
+            "normalized_text": parsed.normalized_text,
+            "languages": list(parsed.languages),
+            "claim_text": parsed.claim_text,
+            "retrieval_text": parsed.retrieval_text,
+        }
+
+    return diagnostic
+
+
+def track_runtime_objects(
+    current_objects: dict[str, Any],
+    loaded_objects: dict[str, Any],
+) -> tuple[dict[str, int | None], dict[str, str], list[str]]:
+    object_ids: dict[str, int | None] = {}
+    lifecycle: dict[str, str] = {}
+    violations: list[str] = []
+
+    for name, current in current_objects.items():
+        object_ids[name] = id(current) if current is not None else None
+        previous = loaded_objects.get(name)
+
+        if current is None:
+            if previous is None:
+                lifecycle[name] = "not_loaded"
+            else:
+                lifecycle[name] = "unexpectedly_unloaded"
+                violations.append(name)
+        elif previous is None:
+            loaded_objects[name] = current
+            lifecycle[name] = "first_load"
+        elif current is previous:
+            lifecycle[name] = "reused"
+        else:
+            lifecycle[name] = "replaced"
+            violations.append(name)
+
+    return object_ids, lifecycle, violations
 
 
 def load_rows(path: Path) -> dict[str, dict[str, str]]:
@@ -371,7 +598,8 @@ if missing_prediction_ids or missing_split_ids:
         f"predictions={missing_prediction_ids}, split={missing_split_ids}"
     )
 
-runtime = QwenV7Runtime()
+qwen_delegate = QwenV7Runtime()
+runtime = CapturingQwenRuntime(qwen_delegate)
 ocr_engine = EasyOcrEngine()
 normalizer = QwenV7Normalizer(runtime=runtime)
 retriever = V7TextRetriever()
@@ -417,8 +645,9 @@ report: dict[str, Any] = {
     "all_cases_passed": False,
 }
 
-loaded_object_ids: dict[str, int] | None = None
+loaded_runtime_objects: dict[str, Any] = {}
 failed_query_ids: list[str] = []
+health_observation_query_ids: list[str] = []
 
 for query_id in QUERY_IDS:
     image_path = root / "query_images" / f"{query_id}.png"
@@ -449,6 +678,7 @@ for query_id in QUERY_IDS:
     }
 
     capturing_verifier.last_result = None
+    runtime.begin_case(query_id)
     started = perf_counter()
 
     try:
@@ -462,15 +692,18 @@ for query_id in QUERY_IDS:
         wall_ms = round((perf_counter() - started) * 1000)
         cascade_result = capturing_verifier.last_result
 
-        current_object_ids = {
-            "easyocr_reader": id(ocr_engine._reader),
-            "qwen_model": id(runtime._model),
-            "qwen_tokenizer": id(runtime._tokenizer),
-            "minilm_encoder": id(retriever._encoder),
+        current_objects = {
+            "easyocr_reader": ocr_engine._reader,
+            "qwen_model": qwen_delegate._model,
+            "qwen_tokenizer": qwen_delegate._tokenizer,
+            "minilm_encoder": retriever._encoder,
         }
-        if loaded_object_ids is None:
-            loaded_object_ids = current_object_ids
-        runtime_reused = current_object_ids == loaded_object_ids
+        current_object_ids, object_lifecycle, identity_violations = (
+            track_runtime_objects(current_objects, loaded_runtime_objects)
+        )
+        runtime_reused = not identity_violations
+        qwen_calls = runtime.calls_for(query_id)
+        normalization = normalization_diagnostic(qwen_calls)
 
         evidence = [evidence_payload(item) for item in result.evidence]
         claims = [claim.model_dump(mode="json") for claim in result.analysis.claims]
@@ -557,28 +790,81 @@ for query_id in QUERY_IDS:
                     ),
                 },
                 "cascade": cascade_payload(cascade_result),
+                "normalization_diagnostic": normalization,
+                "qwen_generation_calls": qwen_calls,
                 "runtime_object_ids": current_object_ids,
+                "runtime_object_lifecycle": object_lifecycle,
+                "runtime_identity_violations": identity_violations,
                 "health_checks": health_checks,
             }
         )
 
+        if not normalization["parser_accepted"]:
+            print(f"MALFORMED_NORMALIZATION query_id={query_id}")
+            print(
+                "NORMALIZATION_INPUT_JSON",
+                json.dumps(
+                    normalization.get("normalization_input"),
+                    ensure_ascii=False,
+                ),
+            )
+            print(
+                "NORMALIZATION_RAW_GENERATION_JSON",
+                json.dumps(
+                    normalization.get("raw_generation"),
+                    ensure_ascii=False,
+                ),
+            )
+            print(
+                "NORMALIZATION_PARSER_DIAGNOSTIC",
+                json.dumps(normalization, ensure_ascii=False, indent=2),
+            )
+
         failed_checks = [
             name for name, passed in health_checks.items() if not passed
         ]
-        if failed_checks:
+        normalization_abstention_checks = {
+            "at_least_one_claim",
+            "retrieval_text_non_empty",
+            "evidence_non_empty",
+        }
+        permitted_observations = (
+            normalization_abstention_checks
+            if not normalization["parser_accepted"]
+            else set()
+        )
+        hard_failed_checks = [
+            name for name in failed_checks if name not in permitted_observations
+        ]
+        if hard_failed_checks:
             raise AssertionError(
-                "Production health invariant(s) failed: " + ", ".join(failed_checks)
+                "Production health invariant(s) failed: "
+                + ", ".join(hard_failed_checks)
             )
 
-        case_record["status"] = "PASS"
+        if failed_checks:
+            health_observation_query_ids.append(query_id)
+            case_record["status"] = "COMPLETE_WITH_HEALTH_OBSERVATIONS"
+            case_record["failed_health_checks"] = failed_checks
+        else:
+            case_record["status"] = "PASS"
         print("CASE_RESULT")
         print(json.dumps(case_record, ensure_ascii=False, indent=2))
-        print(f"CASE_PASS query_id={query_id}")
+        if failed_checks:
+            print(
+                f"CASE_RECORDED query_id={query_id} "
+                f"failed_health_checks={','.join(failed_checks)}"
+            )
+        else:
+            print(f"CASE_PASS query_id={query_id}")
     except Exception as exc:
         failed_query_ids.append(query_id)
+        qwen_calls = runtime.calls_for(query_id)
         case_record["status"] = "FAIL"
         case_record["error"] = f"{type(exc).__name__}: {exc}"
         case_record["traceback"] = traceback.format_exc()
+        case_record["qwen_generation_calls"] = qwen_calls
+        case_record["normalization_diagnostic"] = normalization_diagnostic(qwen_calls)
         print("CASE_RESULT")
         print(json.dumps(case_record, ensure_ascii=False, indent=2))
         print(f"CASE_FAIL query_id={query_id}: {type(exc).__name__}: {exc}")
@@ -587,8 +873,10 @@ for query_id in QUERY_IDS:
     write_report(result_path, report)
 
 report["completed_at_utc"] = datetime.now(timezone.utc).isoformat()
-report["all_cases_passed"] = not failed_query_ids
+report["all_cases_passed"] = not failed_query_ids and not health_observation_query_ids
+report["diagnostic_completed"] = not failed_query_ids
 report["failed_query_ids"] = failed_query_ids
+report["health_observation_query_ids"] = health_observation_query_ids
 write_report(result_path, report)
 
 print("FINAL_REPORT_PATH", result_path)
@@ -598,6 +886,7 @@ print(
             "cases": len(report["cases"]),
             "passed": len(report["cases"]) - len(failed_query_ids),
             "failed_query_ids": failed_query_ids,
+            "health_observation_query_ids": health_observation_query_ids,
             "result_path": str(result_path),
         },
         ensure_ascii=False,
@@ -607,10 +896,12 @@ print(
 
 if failed_query_ids:
     raise SystemExit(
-        "Image-only smoke failed for: " + ", ".join(failed_query_ids)
+        "Image-only diagnostic execution failed for: " + ", ".join(failed_query_ids)
     )
 
-print("FINAL_FIVE_IMAGE_SMOKE_OK")
+print("FINAL_FIVE_IMAGE_DIAGNOSTIC_OK")
+if not health_observation_query_ids:
+    print("FINAL_FIVE_IMAGE_SMOKE_OK")
 PY
 
 test -f "$RESULT_PATH"
