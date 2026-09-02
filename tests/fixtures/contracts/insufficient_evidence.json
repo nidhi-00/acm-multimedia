@@ -2,7 +2,7 @@
   "schema_version": "0.1",
   "request_id": "fixture-insufficient",
   "input": {
-    "post_text": "Kal se is nayi policy ke wajah se sab private schools band rahenge.",
+    "post_text": "Jagannath Puri temple ka khazana vault 46 saal baad khula: secret chamber ke andar kya hai?",
     "image_present": false
   },
   "analysis": {
@@ -10,20 +10,20 @@
     "languages": [
       {
         "label": "Hindi-Roman",
-        "text": "Kal se is nayi policy ke wajah se sab private schools band rahenge"
+        "text": "Jagannath Puri temple ka khazana vault 46 saal baad khula"
       },
       {
         "label": "English",
-        "text": "private schools"
+        "text": "vault, secret chamber"
       }
     ],
-    "normalized_text": "Kal se nayi policy ke karan sab private schools band rahenge.",
-    "retrieval_text": "All private schools will close tomorrow because of a new policy.",
+    "normalized_text": "Jagannath Puri temple ka Ratna Bhandar 46 saal baad khola gaya; secret chamber mein keemti vastu hone ka daava hai.",
+    "retrieval_text": "The secret chamber of Jagannath Puri temple's Ratna Bhandar contains valuable items.",
     "claims": [
       {
-        "claim": "All private schools will close tomorrow because of a new policy.",
-        "entities": ["private schools"],
-        "temporal_reference": "tomorrow",
+        "claim": "The secret chamber of Jagannath Puri temple's Ratna Bhandar contains valuable items.",
+        "entities": ["Jagannath Puri temple", "Ratna Bhandar"],
+        "temporal_reference": null,
         "checkworthy": true
       }
     ],
@@ -31,24 +31,24 @@
   },
   "evidence": [
     {
-      "evidence_id": "ev-insufficient-001",
+      "evidence_id": "evdoc-395425c84d623f3b",
       "rank": 1,
-      "title": "General education circular",
-      "source_name": "Education Department Archive",
-      "source_url": null,
-      "snippet": "A recent circular discusses school administration but does not announce a closure.",
+      "title": "Puri Jagannath Temple's Ratna Bhandar opens after 46 years: What's inside?",
+      "source_name": "business-standard.com",
+      "source_url": "https://www.business-standard.com/india-news/puri-jagannath-temple-s-ratna-bhandar-opens-after-46-years-what-s-inside-124071500727_1.html",
+      "snippet": "The report describes the reopening and valuables found in the outer chamber, but does not establish the claim about a secret chamber.",
       "image_path": null,
-      "text_score": 0.43,
+      "text_score": 0.86,
       "image_score": null,
       "combined_score": null,
-      "evidence_verdict": "RELATED"
+      "evidence_verdict": null
     }
   ],
   "verdict": "INSUFFICIENT_EVIDENCE",
-  "confidence": null,
-  "explanation": "The retrieved item is only generally related and does not establish whether the claimed closure will occur.",
+  "confidence": 0.0,
+  "explanation": "The retrieved report does not explicitly establish that a secret chamber contains valuable items, so the claim remains unverified.",
   "warnings": [
-    "No authoritative announcement was found in the mock evidence set."
+    "Prepared example: the displayed analysis, evidence, and verdict are fixed for this scenario."
   ],
   "latency": {
     "total_ms": 670,
@@ -56,4 +56,3 @@
     "verification_ms": 190
   }
 }
-

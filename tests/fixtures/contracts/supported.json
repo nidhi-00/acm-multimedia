@@ -2,73 +2,57 @@
   "schema_version": "0.1",
   "request_id": "fixture-supported",
   "input": {
-    "post_text": "Delhi Metro ki Yellow Line par aaj normal service chal rahi hai.",
-    "image_present": true
+    "post_text": "Vikrant Massey ne 37 ki umar mein acting se retirement ka announcement kar diya.",
+    "image_present": false
   },
   "analysis": {
-    "ocr_text": "DELHI METRO SERVICE UPDATE · YELLOW LINE NORMAL",
+    "ocr_text": null,
     "languages": [
       {
         "label": "Hindi-Roman",
-        "text": "Delhi Metro ki Yellow Line par aaj",
-        "start": 0,
-        "end": 36
+        "text": "Vikrant Massey ne 37 ki umar mein acting se retirement ka announcement kar diya"
       },
       {
         "label": "English",
-        "text": "normal service",
-        "start": 37,
-        "end": 51
+        "text": "acting, retirement, announcement"
       }
     ],
-    "normalized_text": "Delhi Metro ki Yellow Line par aaj normal service chal rahi hai.",
-    "retrieval_text": "Delhi Metro Yellow Line is operating normally today.",
+    "normalized_text": "Vikrant Massey ne 37 saal ki umar mein acting se retirement announce ki.",
+    "retrieval_text": "Vikrant Massey announced his retirement from acting at age 37.",
     "claims": [
       {
-        "claim": "Delhi Metro's Yellow Line is operating normally today.",
-        "entities": ["Delhi Metro", "Yellow Line"],
-        "temporal_reference": "today",
+        "claim": "Vikrant Massey announced his retirement from acting at age 37.",
+        "entities": ["Vikrant Massey"],
+        "temporal_reference": null,
         "checkworthy": true
       }
     ],
-    "visual_description": "A red and white public-transport service update card with the Delhi Metro wordmark."
+    "visual_description": null
   },
   "evidence": [
     {
-      "evidence_id": "ev-supported-001",
+      "evidence_id": "evdoc-c73c683acf591570",
       "rank": 1,
-      "title": "Normal services reported on Yellow Line",
-      "source_name": "Delhi Metro Rail Corporation",
-      "source_url": "https://example.invalid/dmrc-yellow-line",
-      "snippet": "The official service update states that trains are operating normally on the Yellow Line.",
-      "image_path": "demo_assets/examples/metro-update.png",
-      "text_score": 0.95,
-      "image_score": 0.89,
-      "combined_score": 0.93,
-      "evidence_verdict": "SUPPORTS"
-    },
-    {
-      "evidence_id": "ev-supported-002",
-      "rank": 2,
-      "title": "Commuter bulletin lists no Yellow Line disruption",
-      "source_name": "City Transit Desk",
-      "source_url": null,
-      "snippet": "The daily transit bulletin lists delays elsewhere but no Yellow Line closure.",
+      "title": "Vikrant Massey announces retirement from acting at 37: ‘It’s time to recalibrate, go back home’",
+      "source_name": "indianexpress.com",
+      "source_url": "https://indianexpress.com/article/entertainment/bollywood/vikrant-massey-announces-retirement-from-acting-at-37-its-time-to-recalibrate-go-back-home-9701407",
+      "snippet": "The report states that actor Vikrant Massey announced his retirement from acting at age 37.",
       "image_path": null,
-      "text_score": 0.83,
+      "text_score": 0.91,
       "image_score": null,
-      "combined_score": 0.81,
+      "combined_score": null,
       "evidence_verdict": "SUPPORTS"
     }
   ],
   "verdict": "SUPPORTED",
-  "confidence": 0.96,
-  "explanation": "The caption and service card agree with two contemporaneous service updates, including the official operator notice.",
-  "warnings": [],
+  "confidence": 1.0,
+  "explanation": "The retrieved report directly supports the claim that Vikrant Massey announced his retirement from acting at age 37.",
+  "warnings": [
+    "Prepared example: the displayed analysis, evidence, and verdict are fixed for this scenario."
+  ],
   "latency": {
     "total_ms": 820,
     "retrieval_ms": 120,
     "verification_ms": 240
   }
 }
-

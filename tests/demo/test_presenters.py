@@ -82,12 +82,15 @@ def test_minimal_analysis_uses_intentional_empty_states_without_fake_values() ->
     assert "Visual description" not in rendered
 
 
-def test_caveats_are_hidden_when_no_warning_is_supplied() -> None:
+def test_prepared_fixture_caveat_is_explicit() -> None:
     result = VerificationResult.model_validate_json(
         (FIXTURE_DIRECTORY / "supported.json").read_text(encoding="utf-8")
     )
 
-    assert render_caveats(result) == ""
+    rendered = render_caveats(result)
+
+    assert "Prepared example" in rendered
+    assert "live OCR" not in rendered
 
 
 @pytest.mark.parametrize(
@@ -102,6 +105,22 @@ def test_caveats_replace_internal_mock_language(fixture_name: str) -> None:
 
     assert "mock" not in rendered.lower()
     assert "fixture" not in rendered.lower()
+
+
+@pytest.mark.parametrize(
+    "fixture_name", ["supported", "contradicted", "insufficient_evidence"]
+)
+def test_prepared_evidence_has_text_scores_only(fixture_name: str) -> None:
+    result = VerificationResult.model_validate_json(
+        (FIXTURE_DIRECTORY / f"{fixture_name}.json").read_text(encoding="utf-8")
+    )
+
+    rendered = render_evidence(result.evidence)
+
+    assert "Text " in rendered
+    assert "Visual " not in rendered
+    assert "Combined " not in rendered
+    assert "Visual evidence available" not in rendered
 
 
 def test_original_caption_is_html_escaped() -> None:

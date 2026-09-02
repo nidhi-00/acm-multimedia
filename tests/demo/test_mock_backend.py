@@ -56,6 +56,36 @@ def test_mock_backend_honors_top_k() -> None:
     assert result.evidence[0].rank == 1
 
 
+def test_prepared_result_content_does_not_depend_on_free_form_text() -> None:
+    backend = MockBackend(MockScenario.SUPPORTED)
+
+    first = backend.verify(
+        VerificationRequest(request_id="first", post_text="Arbitrary first caption")
+    )
+    second = backend.verify(
+        VerificationRequest(request_id="second", post_text="Unrelated second caption")
+    )
+
+    assert first.analysis == second.analysis
+    assert first.evidence == second.evidence
+    assert first.verdict == second.verdict
+    assert first.explanation == second.explanation
+
+
+@pytest.mark.parametrize("scenario", list(MockScenario))
+def test_mock_results_do_not_claim_visual_semantic_outputs(
+    scenario: MockScenario,
+) -> None:
+    result = MockBackend(scenario).verify(
+        VerificationRequest(request_id="request-1", post_text="Prepared claim")
+    )
+
+    assert result.analysis.visual_description is None
+    assert all(item.image_path is None for item in result.evidence)
+    assert all(item.image_score is None for item in result.evidence)
+    assert all(item.combined_score is None for item in result.evidence)
+
+
 @pytest.mark.parametrize(
     "scenario", [MockScenario.NO_EVIDENCE, MockScenario.MINIMAL_VALID]
 )

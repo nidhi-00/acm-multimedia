@@ -24,13 +24,13 @@ DEFAULT_SCENARIO = MockScenario.CONTRADICTED.value
 
 EXAMPLE_CAPTIONS = {
     MockScenario.SUPPORTED.value: (
-        "Delhi Metro ki Yellow Line par aaj normal service chal rahi hai, official update dekho."
+        "Vikrant Massey ne 37 ki umar mein acting se retirement ka announcement kar diya."
     ),
     MockScenario.CONTRADICTED.value: (
-        "Mumbai mein aaj ka scene hai — airport ke paas sab roads completely flooded hain."
+        "Paris mein Muslims road par namaz padhte hain aur French citizens national anthem gaa kar unhe jawab dete hain."
     ),
     MockScenario.INSUFFICIENT_EVIDENCE.value: (
-        "Kal se is nayi policy ke wajah se sab private schools band rahenge, confirm news hai."
+        "Jagannath Puri temple ka khazana vault 46 saal baad khula: secret chamber ke andar kya hai?"
     ),
     MockScenario.NO_EVIDENCE.value: (
         "Yeh local bridge aaj subah public ke liye open hua hai kya? Koi report mil sakti hai?"
@@ -38,10 +38,10 @@ EXAMPLE_CAPTIONS = {
 }
 
 EXAMPLE_SCENARIOS = {
-    "Old flood image presented as current": MockScenario.CONTRADICTED.value,
-    "Supported announcement": MockScenario.SUPPORTED.value,
-    "Insufficient evidence": MockScenario.INSUFFICIENT_EVIDENCE.value,
-    "Local claim with no matching evidence": MockScenario.NO_EVIDENCE.value,
+    "Prepared: Paris incident location claim": MockScenario.CONTRADICTED.value,
+    "Prepared: supported retirement announcement": MockScenario.SUPPORTED.value,
+    "Prepared: insufficient temple-vault evidence": MockScenario.INSUFFICIENT_EVIDENCE.value,
+    "Prepared: local claim with no matching evidence": MockScenario.NO_EVIDENCE.value,
 }
 EXAMPLE_CHOICES = list(EXAMPLE_SCENARIOS)
 
@@ -216,7 +216,7 @@ def build_workspace_page(
                 caption_input = gr.Textbox(
                     label="Accompanying caption",
                     placeholder=(
-                        "e.g. Mumbai mein aaj ka scene hai, airport completely band ho gaya..."
+                        "e.g. Paris mein road par namaz ka yeh incident hua tha..."
                     ),
                     lines=11,
                     elem_id="post-caption-input",

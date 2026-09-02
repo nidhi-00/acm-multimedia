@@ -2,89 +2,79 @@
   "schema_version": "0.1",
   "request_id": "fixture-contradicted",
   "input": {
-    "post_text": "Mumbai mein aaj ka scene hai — airport ke paas sab roads flooded hain.",
-    "image_present": true
+    "post_text": "Paris mein Muslims road par namaz padhte hain aur French citizens national anthem gaa kar unhe jawab dete hain.",
+    "image_present": false
   },
   "analysis": {
-    "ocr_text": "BREAKING · MUMBAI AIRPORT ROADS CLOSED TODAY",
+    "ocr_text": null,
     "languages": [
       {
         "label": "Hindi-Roman",
-        "text": "Mumbai mein aaj ka scene hai",
-        "start": 0,
-        "end": 29
+        "text": "Paris mein Muslims road par namaz padhte hain aur French citizens unhe jawab dete hain"
       },
       {
         "label": "English",
-        "text": "airport roads flooded",
-        "start": 32,
-        "end": 53
+        "text": "Paris, road, French citizens, national anthem"
       }
     ],
-    "normalized_text": "Mumbai mein aaj airport ke paas sab roads flooded hain.",
-    "retrieval_text": "The post claims that roads near Mumbai airport are flooded today.",
+    "normalized_text": "Paris mein road par namaz padhne wale Muslims ko French citizens national anthem gaa kar jawab dete hain.",
+    "retrieval_text": "Muslims praying on a road in Paris confronted by French citizens singing the national anthem.",
     "claims": [
       {
-        "claim": "Roads near Mumbai airport are flooded today.",
-        "entities": ["Mumbai Airport"],
-        "temporal_reference": "today",
-        "checkworthy": true
-      },
-      {
-        "claim": "The uploaded photograph was taken in Mumbai today.",
-        "entities": ["Mumbai"],
-        "temporal_reference": "today",
+        "claim": "The shared incident of Muslims praying on a road and being confronted with a national anthem happened in Paris.",
+        "entities": ["Paris", "French citizens"],
+        "temporal_reference": null,
         "checkworthy": true
       }
     ],
-    "visual_description": "Vehicles travel through deep water on a flooded urban road beside concrete buildings."
+    "visual_description": null
   },
   "evidence": [
     {
-      "evidence_id": "ev-contradicted-001",
+      "evidence_id": "evdoc-e83e4a6ed3c246dc",
       "rank": 1,
-      "title": "Flood photograph predates the current Mumbai claim",
-      "source_name": "Example Fact Check",
-      "source_url": "https://example.invalid/flood-photo",
-      "snippet": "The same photograph appeared in reporting about flooding in another city two years earlier.",
-      "image_path": "demo_assets/examples/earlier-flood.png",
+      "title": "2017 Protest Clip Showing Muslims Praying On Street Shared Out Of Context",
+      "source_name": "boomlive.in",
+      "source_url": "https://www.boomlive.in/fact-check/politics/viral-video-france-protest-hanuman-chalisa-row-raj-thackeray-old-video-social-media-17658",
+      "snippet": "The report discusses a 2017 protest involving Muslim worshippers and the French national anthem in a Paris suburb, but does not establish the complete claim.",
+      "image_path": null,
       "text_score": 0.88,
-      "image_score": 0.94,
-      "combined_score": 0.92,
-      "evidence_verdict": "CONTRADICTS"
+      "image_score": null,
+      "combined_score": null,
+      "evidence_verdict": null
     },
     {
-      "evidence_id": "ev-contradicted-002",
+      "evidence_id": "evdoc-ae3cd284e6178b85",
       "rank": 2,
-      "title": "Airport traffic advisory reports normal road access",
-      "source_name": "Mumbai Traffic Police",
-      "source_url": "https://example.invalid/traffic-advisory",
-      "snippet": "The current advisory reports no closure of the airport approach roads.",
+      "title": "Far-right victory leaves left-wing French supporters with bittersweet taste",
+      "source_name": "politico.eu",
+      "source_url": "https://www.politico.eu/article/france-legislative-election-far-right-french-supporters-left-leaning-protesters-rn-win",
+      "snippet": "This report concerns a separate political protest in Paris and does not establish the location of the claimed incident.",
       "image_path": null,
-      "text_score": 0.86,
+      "text_score": 0.63,
       "image_score": null,
-      "combined_score": 0.84,
-      "evidence_verdict": "CONTRADICTS"
+      "combined_score": null,
+      "evidence_verdict": null
     },
     {
-      "evidence_id": "ev-contradicted-003",
+      "evidence_id": "evdoc-8f8c7c9d9d37797a",
       "rank": 3,
-      "title": "Monsoon conditions remain under observation",
-      "source_name": "Regional Weather Desk",
-      "source_url": null,
-      "snippet": "Rain is forecast, but this report does not place the uploaded image in Mumbai.",
+      "title": "Video From Moscow Falsely Peddled As People Offering Namaz On Road In Paris",
+      "source_name": "boomlive.in",
+      "source_url": "https://www.boomlive.in/fact-check/politics/fake-news-viral-video-namaz-on-road-moscow-russia-falsely-shared-as-paris-france-namaz-on-road-factcheck-17818",
+      "snippet": "The fact-check reports that the claimed Paris incident was recorded near Moscow Cathedral Mosque in Russia.",
       "image_path": null,
-      "text_score": 0.61,
+      "text_score": 0.59,
       "image_score": null,
-      "combined_score": 0.58,
-      "evidence_verdict": "RELATED"
+      "combined_score": null,
+      "evidence_verdict": "CONTRADICTS"
     }
   ],
   "verdict": "CONTRADICTED",
-  "confidence": 0.91,
-  "explanation": "The image matches an older event in another location, while the current traffic advisory conflicts with the claimed road closure.",
+  "confidence": 1.0,
+  "explanation": "The retrieved fact-check establishes that the claimed incident was recorded in Moscow, Russia, rather than Paris, France.",
   "warnings": [
-    "Mock result: no live OCR, retrieval, or verification was performed."
+    "Prepared example: the displayed analysis, evidence, and verdict are fixed for this scenario."
   ],
   "latency": {
     "total_ms": 910,
@@ -92,4 +82,3 @@
     "verification_ms": 260
   }
 }
-

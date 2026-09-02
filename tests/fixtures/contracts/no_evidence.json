@@ -6,7 +6,7 @@
     "image_present": true
   },
   "analysis": {
-    "ocr_text": "RIVER VIEW BRIDGE · OPENING SOON",
+    "ocr_text": null,
     "languages": [
       {
         "label": "Hindi-Roman",
@@ -27,14 +27,14 @@
         "checkworthy": true
       }
     ],
-    "visual_description": "A distant road bridge photographed from a riverbank; no opening ceremony is visible."
+    "visual_description": null
   },
   "evidence": [],
   "verdict": "INSUFFICIENT_EVIDENCE",
   "confidence": null,
   "explanation": "No sufficiently relevant evidence was returned, so the claim cannot be supported or contradicted.",
   "warnings": [
-    "The mock retrieval set contains no evidence for this local claim."
+    "Prepared example: no relevant textual evidence is available for this local claim."
   ],
   "latency": {
     "total_ms": 430,
@@ -42,4 +42,3 @@
     "verification_ms": 120
   }
 }
-

@@ -27,7 +27,7 @@ def test_runner_streams_truthful_loading_then_result() -> None:
     states = list(
         runner(
             None,
-            "Mumbai mein aaj ka scene hai.",
+            "Paris mein road par namaz ka yeh incident hua tha.",
             MockScenario.CONTRADICTED.value,
         )
     )
@@ -35,7 +35,7 @@ def test_runner_streams_truthful_loading_then_result() -> None:
     assert len(states) == 2
     assert "Analyzing content" in states[0][0]
     assert "CONTRADICTED" in states[1][4]
-    assert "Confidence 91%" in states[1][4]
+    assert "Confidence 100%" in states[1][4]
 
 
 def test_runner_returns_in_page_missing_input_error() -> None:
