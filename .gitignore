@@ -144,3 +144,8 @@ __pycache__/
 data/raw/
 models/
 .cache/
+
+# Local frozen query-image bundles
+/query_images/
+/query_images_all/
+/query_2/
