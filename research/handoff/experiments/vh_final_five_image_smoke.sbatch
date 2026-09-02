@@ -130,15 +130,13 @@ import os
 import sys
 from pathlib import Path
 
-from packaging.version import Version
-
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise RuntimeError(message)
 
 
 try:
-    hub_version = Version(importlib.metadata.version("huggingface-hub"))
+    hub_version = importlib.metadata.version("huggingface-hub")
 except importlib.metadata.PackageNotFoundError as exc:
     raise RuntimeError(
         "Incompatible persistent runtime: huggingface-hub is not installed. "
@@ -146,9 +144,9 @@ except importlib.metadata.PackageNotFoundError as exc:
         "before retrying this no-install job."
     ) from exc
 require(
-    Version("0.34") <= hub_version < Version("1"),
-    "Incompatible persistent runtime: transformers requires "
-    "huggingface-hub>=0.34,<1, but found "
+    hub_version == "0.36.2",
+    "Incompatible persistent runtime: the frozen demo requires "
+    "huggingface-hub==0.36.2, but found "
     f"huggingface-hub=={hub_version}. Run the three-class setup smoke to "
     "repair the persistent environment before retrying this no-install job.",
 )
@@ -166,19 +164,19 @@ from transformers import Qwen2ForCausalLM
 
 require(sys.version_info[:3] == (3, 11, 9), f"Python mismatch: {sys.version}")
 require(
-    torch.__version__.startswith("2.6.0"),
+    torch.__version__ == "2.6.0+cu118",
     f"Torch mismatch: {torch.__version__}",
 )
 require(torch.version.cuda == "11.8", f"Torch CUDA mismatch: {torch.version.cuda}")
 require(
-    torchvision.__version__.startswith("0.21.0"),
+    torchvision.__version__ == "0.21.0+cu118",
     f"torchvision mismatch: {torchvision.__version__}",
 )
 require(torch.cuda.is_available(), "CUDA is unavailable inside the GPU job.")
 require(
-    importlib.metadata.version("gradio") == "6.26.0"
-    and gradio.__version__ == "6.26.0",
-    "Gradio must be exactly 6.26.0 in the persistent runtime.",
+    importlib.metadata.version("gradio") == "6.17.3"
+    and gradio.__version__ == "6.17.3",
+    "Gradio must be exactly 6.17.3 in the persistent runtime.",
 )
 require(
     importlib.metadata.version("sentence-transformers") == "3.4.1",
@@ -188,17 +186,17 @@ require(
     importlib.metadata.version("easyocr") == "1.7.2",
     "EasyOCR must be 1.7.2.",
 )
-transformers_version = Version(importlib.metadata.version("transformers"))
 require(
-    Version("4.45") <= transformers_version < Version("5"),
-    f"Transformers version is outside the frozen runtime range: {transformers_version}",
+    importlib.metadata.version("transformers") == "4.57.6"
+    and transformers.__version__ == "4.57.6",
+    "Transformers must be exactly 4.57.6 in the persistent runtime.",
 )
 require(
     Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM",
     "Qwen2ForCausalLM could not be imported.",
 )
 require(
-    Version(huggingface_hub.__version__) == hub_version,
+    huggingface_hub.__version__ == hub_version,
     "Imported huggingface_hub version does not match its installed metadata.",
 )
 

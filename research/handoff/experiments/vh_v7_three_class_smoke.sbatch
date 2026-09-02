@@ -96,11 +96,6 @@ environment_is_valid() {
 import importlib.metadata
 import sys
 
-from packaging.version import Version
-
-hub_version = Version(importlib.metadata.version("huggingface-hub"))
-assert Version("0.34") <= hub_version < Version("1"), hub_version
-
 import easyocr
 import gradio
 import huggingface_hub
@@ -113,16 +108,19 @@ from transformers import Qwen2ForCausalLM
 
 
 assert sys.version_info[:3] == (3, 11, 9), sys.version
-assert torch.__version__.startswith("2.6.0"), torch.__version__
+assert torch.__version__ == "2.6.0+cu118", torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
-assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torchvision.__version__ == "0.21.0+cu118", torchvision.__version__
 assert torch.cuda.is_available()
-assert importlib.metadata.version("gradio") == "6.26.0"
-assert gradio.__version__ == "6.26.0"
+assert importlib.metadata.version("huggingface-hub") == "0.36.2"
+assert huggingface_hub.__version__ == "0.36.2"
+assert importlib.metadata.version("transformers") == "4.57.6"
+assert transformers.__version__ == "4.57.6"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
+assert sentence_transformers.__version__ == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
-assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
-assert Version(huggingface_hub.__version__) == hub_version
+assert importlib.metadata.version("gradio") == "6.17.3"
+assert gradio.__version__ == "6.17.3"
 assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
 PY
 }
@@ -133,15 +131,20 @@ import torch
 import torchvision
 
 
-assert torch.__version__.startswith("2.6.0"), torch.__version__
+assert torch.__version__ == "2.6.0+cu118", torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
-assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torchvision.__version__ == "0.21.0+cu118", torchvision.__version__
 assert torch.cuda.is_available()
 PY
 }
 
-if [ -f "$READY_MARKER" ] && environment_is_valid; then
-    echo "Reusing the existing frozen real-runtime environment."
+if environment_is_valid; then
+    if [ -f "$READY_MARKER" ]; then
+        echo "Reusing the existing frozen real-runtime environment."
+    else
+        echo "The exact frozen runtime validates; recreating its readiness marker."
+        touch "$READY_MARKER"
+    fi
 else
     rm -f "$READY_MARKER"
 
@@ -170,11 +173,6 @@ fi
 import importlib.metadata
 import sys
 
-from packaging.version import Version
-
-hub_version = Version(importlib.metadata.version("huggingface-hub"))
-assert Version("0.34") <= hub_version < Version("1"), hub_version
-
 import easyocr
 import gradio
 import huggingface_hub
@@ -186,16 +184,19 @@ from transformers import Qwen2ForCausalLM
 
 
 assert sys.version_info[:3] == (3, 11, 9), sys.version
-assert torch.__version__.startswith("2.6.0"), torch.__version__
+assert torch.__version__ == "2.6.0+cu118", torch.__version__
 assert torch.version.cuda == "11.8", torch.version.cuda
-assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torchvision.__version__ == "0.21.0+cu118", torchvision.__version__
 assert torch.cuda.is_available()
-assert importlib.metadata.version("gradio") == "6.26.0"
-assert gradio.__version__ == "6.26.0"
+assert importlib.metadata.version("huggingface-hub") == "0.36.2"
+assert huggingface_hub.__version__ == "0.36.2"
+assert importlib.metadata.version("transformers") == "4.57.6"
+assert transformers.__version__ == "4.57.6"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
+assert sentence_transformers.__version__ == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
-assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
-assert Version(huggingface_hub.__version__) == hub_version
+assert importlib.metadata.version("gradio") == "6.17.3"
+assert gradio.__version__ == "6.17.3"
 assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
 
 print("Python:", sys.version.split()[0])
