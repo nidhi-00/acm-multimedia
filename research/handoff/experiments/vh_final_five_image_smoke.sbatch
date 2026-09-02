@@ -77,11 +77,6 @@ required_files=(
     "$REPO/outputs/text_evidence_embeddings.npy"
     "$REPO/data/processed/retrieval_queries_final_split_v7.csv"
     "$REPO/outputs/final/v7_final_predictions.csv"
-    "$REPO/query_images/hmx-0010.png"
-    "$REPO/query_images/hmx-0611.png"
-    "$REPO/query_images/hmx-0239.png"
-    "$REPO/query_images/hmx-0191.png"
-    "$REPO/query_images/hmx-0000.png"
 )
 
 for required_file in "${required_files[@]}"; do
@@ -266,13 +261,25 @@ from demo.pipeline.verification import (
 )
 
 
-QUERY_IDS = (
+DEFAULT_QUERY_IDS = (
     "hmx-0010",
     "hmx-0611",
     "hmx-0239",
     "hmx-0191",
     "hmx-0000",
 )
+case_ids_raw = os.environ.get("VH_CASE_IDS")
+if case_ids_raw is None:
+    QUERY_IDS = DEFAULT_QUERY_IDS
+else:
+    case_id_parts = case_ids_raw.split(",")
+    if not case_ids_raw.strip() or any(not part.strip() for part in case_id_parts):
+        raise RuntimeError(
+            "VH_CASE_IDS must be a non-empty comma-separated list of query IDs."
+        )
+    QUERY_IDS = tuple(part.strip() for part in case_id_parts)
+    if len(set(QUERY_IDS)) != len(QUERY_IDS):
+        raise RuntimeError("VH_CASE_IDS must not contain duplicate query IDs.")
 ALLOWED_VERDICTS = {
     FinalVerdict.SUPPORTED,
     FinalVerdict.CONTRADICTED,
@@ -592,11 +599,33 @@ split_rows = load_rows(
 
 missing_prediction_ids = [query_id for query_id in QUERY_IDS if query_id not in prediction_rows]
 missing_split_ids = [query_id for query_id in QUERY_IDS if query_id not in split_rows]
-if missing_prediction_ids or missing_split_ids:
+invalid_query_ids = [
+    query_id for query_id in QUERY_IDS if re.fullmatch(r"hmx-\d{4}", query_id) is None
+]
+missing_image_ids = [
+    query_id
+    for query_id in QUERY_IDS
+    if not (root / "query_images" / f"{query_id}.png").is_file()
+]
+if invalid_query_ids or missing_prediction_ids or missing_split_ids or missing_image_ids:
     raise RuntimeError(
-        "Frozen diagnostics are missing query IDs: "
-        f"predictions={missing_prediction_ids}, split={missing_split_ids}"
+        "Invalid VH_CASE_IDS selection: "
+        f"invalid_format={invalid_query_ids}, "
+        f"missing_predictions={missing_prediction_ids}, "
+        f"missing_split_rows={missing_split_ids}, "
+        f"missing_images={missing_image_ids}"
     )
+
+for query_id in QUERY_IDS:
+    image_name = f"{query_id}.png"
+    recorded_image_name = Path(
+        split_rows[query_id]["query_image_path"].replace("\\", "/")
+    ).name
+    if recorded_image_name != image_name:
+        raise RuntimeError(
+            f"Frozen image mapping mismatch for {query_id}: "
+            f"{split_rows[query_id]['query_image_path']!r}"
+        )
 
 qwen_delegate = QwenV7Runtime()
 runtime = CapturingQwenRuntime(qwen_delegate)
@@ -641,6 +670,7 @@ report: dict[str, Any] = {
         "top_k": 5,
     },
     "semantic_correctness_asserted": False,
+    "case_ids": list(QUERY_IDS),
     "cases": [],
     "all_cases_passed": False,
 }
@@ -652,13 +682,6 @@ health_observation_query_ids: list[str] = []
 for query_id in QUERY_IDS:
     image_path = root / "query_images" / f"{query_id}.png"
     prediction = prediction_rows[query_id]
-    split_row = split_rows[query_id]
-    recorded_image_name = Path(split_row["query_image_path"].replace("\\", "/")).name
-    if recorded_image_name != image_path.name:
-        raise RuntimeError(
-            f"Frozen image mapping mismatch for {query_id}: "
-            f"{split_row['query_image_path']!r}"
-        )
 
     historical = {
         "frozen_text_verdict": prediction["verdict"],
