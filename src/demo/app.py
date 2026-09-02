@@ -60,7 +60,6 @@ def launch_options(gr: Any) -> dict[str, Any]:
         "js": read_interactions(),
         "theme": gr.themes.Base(primary_hue="orange", neutral_hue="gray"),
         "footer_links": [],
-        "run_history": False,
         "show_error": False,
     }
 

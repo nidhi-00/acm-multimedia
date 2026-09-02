@@ -20,7 +20,6 @@ def test_launch_options_remove_footer_and_use_local_assets() -> None:
     options = launch_options(gr)
 
     assert options["footer_links"] == []
-    assert options["run_history"] is False
     assert options["css_paths"] == STYLES_PATH
     assert STYLES_PATH.is_file()
     assert "IntersectionObserver" in options["js"]
