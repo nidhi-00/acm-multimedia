@@ -132,18 +132,36 @@ from pathlib import Path
 
 from packaging.version import Version
 
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise RuntimeError(message)
+
+
+try:
+    hub_version = Version(importlib.metadata.version("huggingface-hub"))
+except importlib.metadata.PackageNotFoundError as exc:
+    raise RuntimeError(
+        "Incompatible persistent runtime: huggingface-hub is not installed. "
+        "Run the three-class setup smoke to repair the persistent environment "
+        "before retrying this no-install job."
+    ) from exc
+require(
+    Version("0.34") <= hub_version < Version("1"),
+    "Incompatible persistent runtime: transformers requires "
+    "huggingface-hub>=0.34,<1, but found "
+    f"huggingface-hub=={hub_version}. Run the three-class setup smoke to "
+    "repair the persistent environment before retrying this no-install job.",
+)
+
 import easyocr
+import gradio
+import huggingface_hub
 import sentence_transformers
 import torch
 import torchvision
 import transformers
 from easyocr.config import MODULE_PATH, detection_models, recognition_models
 from transformers import Qwen2ForCausalLM
-
-
-def require(condition: bool, message: str) -> None:
-    if not condition:
-        raise RuntimeError(message)
 
 
 require(sys.version_info[:3] == (3, 11, 9), f"Python mismatch: {sys.version}")
@@ -157,6 +175,11 @@ require(
     f"torchvision mismatch: {torchvision.__version__}",
 )
 require(torch.cuda.is_available(), "CUDA is unavailable inside the GPU job.")
+require(
+    importlib.metadata.version("gradio") == "6.26.0"
+    and gradio.__version__ == "6.26.0",
+    "Gradio must be exactly 6.26.0 in the persistent runtime.",
+)
 require(
     importlib.metadata.version("sentence-transformers") == "3.4.1",
     "sentence-transformers must be 3.4.1.",
@@ -173,6 +196,10 @@ require(
 require(
     Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM",
     "Qwen2ForCausalLM could not be imported.",
+)
+require(
+    Version(huggingface_hub.__version__) == hub_version,
+    "Imported huggingface_hub version does not match its installed metadata.",
 )
 
 easyocr_model_dir = Path(MODULE_PATH) / "model"
@@ -196,6 +223,8 @@ print("Torch:", torch.__version__)
 print("Torch CUDA build:", torch.version.cuda)
 print("torchvision:", torchvision.__version__)
 print("CUDA available:", torch.cuda.is_available())
+print("Gradio:", gradio.__version__)
+print("Hugging Face Hub:", huggingface_hub.__version__)
 print("Transformers:", transformers.__version__)
 print("SentenceTransformers:", sentence_transformers.__version__)
 print("EasyOCR:", importlib.metadata.version("easyocr"))
@@ -372,6 +401,8 @@ report: dict[str, Any] = {
     "packages": {
         "torch": torch.__version__,
         "easyocr": importlib.metadata.version("easyocr"),
+        "gradio": importlib.metadata.version("gradio"),
+        "huggingface_hub": importlib.metadata.version("huggingface-hub"),
         "transformers": importlib.metadata.version("transformers"),
         "sentence_transformers": importlib.metadata.version(
             "sentence-transformers"

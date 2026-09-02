@@ -98,7 +98,12 @@ import sys
 
 from packaging.version import Version
 
+hub_version = Version(importlib.metadata.version("huggingface-hub"))
+assert Version("0.34") <= hub_version < Version("1"), hub_version
+
 import easyocr
+import gradio
+import huggingface_hub
 import sentence_transformers
 import demo
 import torch
@@ -113,10 +118,25 @@ assert torch.version.cuda == "11.8", torch.version.cuda
 assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
 assert torch.cuda.is_available()
 assert importlib.metadata.version("gradio") == "6.26.0"
+assert gradio.__version__ == "6.26.0"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
+assert Version(huggingface_hub.__version__) == hub_version
 assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
+PY
+}
+
+torch_stack_is_valid() {
+    "$PY" - <<'PY' >/dev/null 2>&1
+import torch
+import torchvision
+
+
+assert torch.__version__.startswith("2.6.0"), torch.__version__
+assert torch.version.cuda == "11.8", torch.version.cuda
+assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
+assert torch.cuda.is_available()
 PY
 }
 
@@ -125,14 +145,18 @@ if [ -f "$READY_MARKER" ] && environment_is_valid; then
 else
     rm -f "$READY_MARKER"
 
-    # Force both wheels because a stale +cu124 local build can otherwise
-    # satisfy the public ==0.21.0 version while remaining CUDA-incompatible.
-    "$UV_BIN" pip install \
-      --python "$PY" \
-      --reinstall \
-      torch==2.6.0 \
-      torchvision==0.21.0 \
-      --index-url https://download.pytorch.org/whl/cu118
+    if torch_stack_is_valid; then
+        echo "Reusing the compatible persistent Torch/torchvision cu118 stack."
+    else
+        # Force both wheels because a stale +cu124 local build can otherwise
+        # satisfy the public ==0.21.0 version while remaining CUDA-incompatible.
+        "$UV_BIN" pip install \
+          --python "$PY" \
+          --reinstall \
+          torch==2.6.0 \
+          torchvision==0.21.0 \
+          --index-url https://download.pytorch.org/whl/cu118
+    fi
 
     "$UV_BIN" pip install \
       --python "$PY" \
@@ -148,7 +172,12 @@ import sys
 
 from packaging.version import Version
 
+hub_version = Version(importlib.metadata.version("huggingface-hub"))
+assert Version("0.34") <= hub_version < Version("1"), hub_version
+
 import easyocr
+import gradio
+import huggingface_hub
 import sentence_transformers
 import torch
 import torchvision
@@ -162,9 +191,11 @@ assert torch.version.cuda == "11.8", torch.version.cuda
 assert torchvision.__version__.startswith("0.21.0"), torchvision.__version__
 assert torch.cuda.is_available()
 assert importlib.metadata.version("gradio") == "6.26.0"
+assert gradio.__version__ == "6.26.0"
 assert importlib.metadata.version("sentence-transformers") == "3.4.1"
 assert importlib.metadata.version("easyocr") == "1.7.2"
 assert Version("4.45") <= Version(importlib.metadata.version("transformers")) < Version("5")
+assert Version(huggingface_hub.__version__) == hub_version
 assert Qwen2ForCausalLM.__name__ == "Qwen2ForCausalLM"
 
 print("Python:", sys.version.split()[0])
@@ -173,6 +204,7 @@ print("Torch:", torch.__version__)
 print("Torch CUDA build:", torch.version.cuda)
 print("torchvision:", torchvision.__version__)
 print("Gradio:", importlib.metadata.version("gradio"))
+print("Hugging Face Hub:", huggingface_hub.__version__)
 print("Transformers:", importlib.metadata.version("transformers"))
 print("SentenceTransformers:", importlib.metadata.version("sentence-transformers"))
 print("Qwen class import:", Qwen2ForCausalLM.__name__)
